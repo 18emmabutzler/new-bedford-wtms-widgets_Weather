@@ -1,78 +1,575 @@
-<style>
-  html, body {
-    margin: 0;
-    padding: 0;
-    background: transparent;
-    font-family: "Avenir Next", Arial, sans-serif;
-    color: #ffffff;
-  }
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  .info-line {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 12px;
-    white-space: nowrap;
-    font-size: 12px;
-    padding: 5px;
-    color: #ffffff;
-  }
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: transparent;
+      font-family: "Avenir Next", Avenir, Arial, sans-serif;
+      color: #ffffff;
+      overflow: hidden;
+    }
 
-  .info-item {
-    color: #ffffff;
-  }
+    .info-line {
+      width: 100%;
+      box-sizing: border-box;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      white-space: nowrap;
+      font-size: 12px;
+      padding: 5px 8px;
+      color: #ffffff;
+    }
 
-  .info-label {
-    font-weight: 600;
-    color: #ffffff;
-  }
+    .info-item,
+    .info-label,
+    .separator,
+    span {
+      color: #ffffff !important;
+    }
 
-  .separator {
-    color: #ffffff;
-    opacity: 0.65;
-  }
-</style>
+    .info-label {
+      font-weight: 600;
+    }
 
-<div class="info-line">
+    .separator {
+      opacity: 0.65;
+    }
+  </style>
+</head>
 
-  <span class="info-item">
-    <span class="info-label">High:</span>
-    <span id="highTide">Loading...</span>
-  </span>
+<body>
 
-  <span class="separator">|</span>
+  <div class="info-line">
 
-  <span class="info-item">
-    <span class="info-label">Low:</span>
-    <span id="lowTide">Loading...</span>
-  </span>
+    <span class="info-item">
+      <span class="info-label">High:</span>
+      <span id="highTide">Loading...</span>
+    </span>
 
-  <span class="separator">|</span>
+    <span class="separator">|</span>
 
-  <span class="info-item">
-    <span class="info-label">Temp:</span>
-    <span id="airTemp">Loading...</span>
-  </span>
+    <span class="info-item">
+      <span class="info-label">Low:</span>
+      <span id="lowTide">Loading...</span>
+    </span>
 
-  <span class="separator">|</span>
+    <span class="separator">|</span>
 
-  <span class="info-item">
-    <span class="info-label">Pressure:</span>
-    <span id="pressure">Loading...</span>
-  </span>
+    <span class="info-item">
+      <span class="info-label">Temp:</span>
+      <span id="airTemp">Loading...</span>
+    </span>
 
-  <span class="separator">|</span>
+    <span class="separator">|</span>
 
-  <span class="info-item">
-    <span class="info-label">Wind:</span>
-    <span id="wind">Loading...</span>
-  </span>
+    <span class="info-item">
+      <span class="info-label">Pressure:</span>
+      <span id="pressure">Loading...</span>
+    </span>
 
-  <span class="separator">|</span>
+    <span class="separator">|</span>
 
-  <span class="info-item">
-    <span class="info-label">Gust:</span>
-    <span id="gust">Loading...</span>
-  </span>
+    <span class="info-item">
+      <span class="info-label">Wind:</span>
+      <span id="wind">Loading...</span>
+    </span>
 
-</div>
+    <span class="separator">|</span>
+
+    <span class="info-item">
+      <span class="info-label">Gust:</span>
+      <span id="gust">Loading...</span>
+    </span>
+
+  </div>
+
+
+  <script>
+
+    /* =========================================================
+       NOAA CONFIGURATION
+       ========================================================= */
+
+    const API =
+      "https://api.tidesandcurrents.noaa.gov/api/prod/datagetter";
+
+    // New Bedford tide prediction station
+    const TIDE_STATION = "8447636";
+
+    // New Bedford Barrier Gate weather station
+    const WEATHER_STATION = "8447627";
+
+    const DATUM = "MLLW";
+
+    const TIMEZONE = "America/New_York";
+
+
+    /* =========================================================
+       DATE / TIME FUNCTIONS
+       ========================================================= */
+
+    function getDateParts(date = new Date()) {
+      const formatter = new Intl.DateTimeFormat("en-US", {
+        timeZone: TIMEZONE,
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        hour12: false
+      });
+
+      const parts = formatter.formatToParts(date);
+
+      const values = {};
+
+      parts.forEach(part => {
+        if (part.type !== "literal") {
+          values[part.type] = part.value;
+        }
+      });
+
+      return values;
+    }
+
+
+    function getNOAADate() {
+      const p = getDateParts();
+
+      return `${p.year}${p.month}${p.day}`;
+    }
+
+
+    function getNowKey() {
+      const p = getDateParts();
+
+      return `${p.year}-${p.month}-${p.day} ${p.hour}:${p.minute}`;
+    }
+
+
+    function formatClock(dateString) {
+
+      const [datePart, timePart] = dateString.split(" ");
+
+      const [year, month, day] =
+        datePart.split("-").map(Number);
+
+      const [hour, minute] =
+        timePart.split(":").map(Number);
+
+      const date = new Date(
+        year,
+        month - 1,
+        day,
+        hour,
+        minute
+      );
+
+      return date.toLocaleTimeString("en-US", {
+        hour: "numeric",
+        minute: "2-digit",
+        hour12: true
+      });
+    }
+
+
+    function formatTideTime(dateString) {
+
+      const now = getDateParts();
+
+      const [datePart] = dateString.split(" ");
+
+      const today =
+        `${now.year}-${now.month}-${now.day}`;
+
+      const todayDate = new Date(
+        Number(now.year),
+        Number(now.month) - 1,
+        Number(now.day)
+      );
+
+      const tomorrowDate =
+        new Date(todayDate);
+
+      tomorrowDate.setDate(
+        tomorrowDate.getDate() + 1
+      );
+
+      const tomorrow =
+        `${tomorrowDate.getFullYear()}-` +
+        `${String(tomorrowDate.getMonth() + 1).padStart(2, "0")}-` +
+        `${String(tomorrowDate.getDate()).padStart(2, "0")}`;
+
+      let dayLabel = "";
+
+      if (datePart === today) {
+        dayLabel = "Today";
+      }
+      else if (datePart === tomorrow) {
+        dayLabel = "Tomorrow";
+      }
+      else {
+        dayLabel = datePart;
+      }
+
+      return `${dayLabel} ${formatClock(dateString)}`;
+    }
+
+
+    /* =========================================================
+       TIDE DATA
+       Station 8447636
+       ========================================================= */
+
+    async function loadTides() {
+
+      try {
+
+        const today = getNOAADate();
+
+        const url =
+          `${API}` +
+          `?begin_date=${today}` +
+          `&range=48` +
+          `&station=${TIDE_STATION}` +
+          `&product=predictions` +
+          `&datum=${DATUM}` +
+          `&time_zone=lst_ldt` +
+          `&interval=hilo` +
+          `&units=english` +
+          `&application=NewBedford_WTMS` +
+          `&format=json`;
+
+        const response = await fetch(url);
+
+        if (!response.ok) {
+          throw new Error("Tide request failed");
+        }
+
+        const data = await response.json();
+
+        if (!data.predictions) {
+          throw new Error("No tide predictions returned");
+        }
+
+        const nowKey = getNowKey();
+
+        const futureTides =
+          data.predictions.filter(
+            tide => tide.t >= nowKey
+          );
+
+        const nextHigh =
+          futureTides.find(
+            tide => tide.type === "H"
+          );
+
+        const nextLow =
+          futureTides.find(
+            tide => tide.type === "L"
+          );
+
+
+        if (nextHigh) {
+
+          document.getElementById(
+            "highTide"
+          ).textContent =
+            `${Number(nextHigh.v).toFixed(2)} ft · ` +
+            `${formatTideTime(nextHigh.t)}`;
+
+        }
+        else {
+
+          document.getElementById(
+            "highTide"
+          ).textContent = "Unavailable";
+
+        }
+
+
+        if (nextLow) {
+
+          document.getElementById(
+            "lowTide"
+          ).textContent =
+            `${Number(nextLow.v).toFixed(2)} ft · ` +
+            `${formatTideTime(nextLow.t)}`;
+
+        }
+        else {
+
+          document.getElementById(
+            "lowTide"
+          ).textContent = "Unavailable";
+
+        }
+
+      }
+
+      catch (error) {
+
+        console.error(
+          "Tide error:",
+          error
+        );
+
+        document.getElementById(
+          "highTide"
+        ).textContent = "Unavailable";
+
+        document.getElementById(
+          "lowTide"
+        ).textContent = "Unavailable";
+
+      }
+
+    }
+
+
+    /* =========================================================
+       AIR TEMPERATURE
+       Station 8447627
+       ========================================================= */
+
+    async function loadAirTemp() {
+
+      try {
+
+        const url =
+          `${API}` +
+          `?date=latest` +
+          `&station=${WEATHER_STATION}` +
+          `&product=air_temperature` +
+          `&time_zone=lst_ldt` +
+          `&units=english` +
+          `&application=NewBedford_WTMS` +
+          `&format=json`;
+
+        const response = await fetch(url);
+
+        if (!response.ok) {
+          throw new Error("Temperature request failed");
+        }
+
+        const data = await response.json();
+
+        const value =
+          data.data &&
+          data.data.length > 0
+            ? data.data[0].v
+            : null;
+
+        document.getElementById(
+          "airTemp"
+        ).textContent =
+          value !== null && value !== ""
+            ? `${Number(value).toFixed(1)}°F`
+            : "Unavailable";
+
+      }
+
+      catch (error) {
+
+        console.error(
+          "Temperature error:",
+          error
+        );
+
+        document.getElementById(
+          "airTemp"
+        ).textContent = "Unavailable";
+
+      }
+
+    }
+
+
+    /* =========================================================
+       BAROMETRIC PRESSURE
+       Station 8447627
+       ========================================================= */
+
+    async function loadPressure() {
+
+      try {
+
+        const url =
+          `${API}` +
+          `?date=latest` +
+          `&station=${WEATHER_STATION}` +
+          `&product=air_pressure` +
+          `&time_zone=lst_ldt` +
+          `&units=metric` +
+          `&application=NewBedford_WTMS` +
+          `&format=json`;
+
+        const response = await fetch(url);
+
+        if (!response.ok) {
+          throw new Error("Pressure request failed");
+        }
+
+        const data = await response.json();
+
+        const value =
+          data.data &&
+          data.data.length > 0
+            ? data.data[0].v
+            : null;
+
+        document.getElementById(
+          "pressure"
+        ).textContent =
+          value !== null && value !== ""
+            ? `${Number(value).toFixed(1)} mb`
+            : "Unavailable";
+
+      }
+
+      catch (error) {
+
+        console.error(
+          "Pressure error:",
+          error
+        );
+
+        document.getElementById(
+          "pressure"
+        ).textContent = "Unavailable";
+
+      }
+
+    }
+
+
+    /* =========================================================
+       WIND + GUST
+       Station 8447627
+       ========================================================= */
+
+    async function loadWind() {
+
+      try {
+
+        const url =
+          `${API}` +
+          `?date=latest` +
+          `&station=${WEATHER_STATION}` +
+          `&product=wind` +
+          `&time_zone=lst_ldt` +
+          `&units=english` +
+          `&application=NewBedford_WTMS` +
+          `&format=json`;
+
+        const response = await fetch(url);
+
+        if (!response.ok) {
+          throw new Error("Wind request failed");
+        }
+
+        const data = await response.json();
+
+        if (
+          !data.data ||
+          data.data.length === 0
+        ) {
+          throw new Error(
+            "No wind data returned"
+          );
+        }
+
+        const windData =
+          data.data[0];
+
+        const speed =
+          windData.s;
+
+        const direction =
+          windData.dr || "";
+
+        const gust =
+          windData.g;
+
+
+        document.getElementById(
+          "wind"
+        ).textContent =
+          speed !== null &&
+          speed !== "" &&
+          speed !== undefined
+            ? `${Number(speed).toFixed(1)} kts ${direction}`
+            : "Unavailable";
+
+
+        document.getElementById(
+          "gust"
+        ).textContent =
+          gust !== null &&
+          gust !== "" &&
+          gust !== undefined
+            ? `${Number(gust).toFixed(1)} kts ${direction}`
+            : "Unavailable";
+
+      }
+
+      catch (error) {
+
+        console.error(
+          "Wind error:",
+          error
+        );
+
+        document.getElementById(
+          "wind"
+        ).textContent = "Unavailable";
+
+        document.getElementById(
+          "gust"
+        ).textContent = "Unavailable";
+
+      }
+
+    }
+
+
+    /* =========================================================
+       LOAD EVERYTHING
+       ========================================================= */
+
+    async function loadEverything() {
+
+      await Promise.all([
+        loadTides(),
+        loadAirTemp(),
+        loadPressure(),
+        loadWind()
+      ]);
+
+    }
+
+
+    /* Initial load */
+
+    loadEverything();
+
+
+    /* Refresh every 6 minutes */
+
+    setInterval(
+      loadEverything,
+      6 * 60 * 1000
+    );
+
+  </script>
+
+</body>
+</html>
