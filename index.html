@@ -1,468 +1,78 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <style>
   html, body {
     margin: 0;
     padding: 0;
     background: transparent;
-    font-family: Arial, Helvetica, sans-serif;
+    font-family: "Avenir Next", Arial, sans-serif;
+    color: #ffffff;
   }
 
   .info-line {
     display: flex;
     align-items: center;
-    gap: 10px;
+    justify-content: center;
+    gap: 12px;
     white-space: nowrap;
-    font-size: 11px;
-    padding: 3px;
+    font-size: 12px;
+    padding: 5px;
+    color: #ffffff;
   }
 
-  .label {
-    font-weight: 700;
+  .info-item {
+    color: #ffffff;
+  }
+
+  .info-label {
+    font-weight: 600;
+    color: #ffffff;
   }
 
   .separator {
-    color: #999;
+    color: #ffffff;
+    opacity: 0.65;
   }
 </style>
-</head>
-
-<body>
 
 <div class="info-line">
 
-  <!-- TIDES -->
-
-  <span>
-    <span class="label">▲ High:</span>
+  <span class="info-item">
+    <span class="info-label">High:</span>
     <span id="highTide">Loading...</span>
   </span>
 
   <span class="separator">|</span>
 
-  <span>
-    <span class="label">▼ Low:</span>
+  <span class="info-item">
+    <span class="info-label">Low:</span>
     <span id="lowTide">Loading...</span>
   </span>
 
   <span class="separator">|</span>
 
-
-  <!-- WEATHER -->
-
-  <span>
-    <span class="label">🌡 Temp:</span>
+  <span class="info-item">
+    <span class="info-label">Temp:</span>
     <span id="airTemp">Loading...</span>
   </span>
 
   <span class="separator">|</span>
 
-  <span>
-    <span class="label">Pressure:</span>
+  <span class="info-item">
+    <span class="info-label">Pressure:</span>
     <span id="pressure">Loading...</span>
   </span>
 
   <span class="separator">|</span>
 
-  <span>
-    <span class="label">💨 Wind:</span>
+  <span class="info-item">
+    <span class="info-label">Wind:</span>
     <span id="wind">Loading...</span>
   </span>
 
   <span class="separator">|</span>
 
-  <span>
-    <span class="label">Gust:</span>
+  <span class="info-item">
+    <span class="info-label">Gust:</span>
     <span id="gust">Loading...</span>
   </span>
 
 </div>
-
-
-<script>
-
-const API =
-  "https://api.tidesandcurrents.noaa.gov/api/prod/datagetter";
-
-/* NOAA STATIONS */
-
-const TIDE_STATION = "8447636";
-const WEATHER_STATION = "8447627";
-
-const DATUM = "MLLW";
-const TIMEZONE = "America/New_York";
-
-
-/* =========================================
-   DATE / TIME FUNCTIONS
-========================================= */
-
-function getDateParts() {
-
-  const parts = new Intl.DateTimeFormat("en-US", {
-    timeZone: TIMEZONE,
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false
-  }).formatToParts(new Date());
-
-  const result = {};
-
-  parts.forEach(part => {
-    result[part.type] = part.value;
-  });
-
-  return result;
-}
-
-
-function getNOAADate() {
-
-  const p = getDateParts();
-
-  return `${p.year}${p.month}${p.day}`;
-}
-
-
-function getNowKey() {
-
-  const p = getDateParts();
-
-  return `${p.year}-${p.month}-${p.day} ${p.hour}:${p.minute}`;
-}
-
-
-function formatClock(dateTime) {
-
-  const pieces = dateTime.split(" ");
-  const time = pieces[1].split(":");
-
-  let hour = parseInt(time[0], 10);
-  const minute = time[1];
-
-  const suffix = hour >= 12 ? "PM" : "AM";
-
-  hour = hour % 12;
-
-  if (hour === 0) {
-    hour = 12;
-  }
-
-  return `${hour}:${minute} ${suffix}`;
-}
-
-
-function formatTideTime(dateTime) {
-
-  const tideDate = dateTime.substring(0, 10);
-
-  const p = getDateParts();
-
-  const today =
-    `${p.year}-${p.month}-${p.day}`;
-
-  const tomorrowDate = new Date();
-
-  tomorrowDate.setDate(
-    tomorrowDate.getDate() + 1
-  );
-
-  const tomorrowParts =
-    new Intl.DateTimeFormat("en-US", {
-      timeZone: TIMEZONE,
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit"
-    }).formatToParts(tomorrowDate);
-
-  const tomorrowObj = {};
-
-  tomorrowParts.forEach(part => {
-    tomorrowObj[part.type] = part.value;
-  });
-
-  const tomorrow =
-    `${tomorrowObj.year}-${tomorrowObj.month}-${tomorrowObj.day}`;
-
-
-  if (tideDate === today) {
-    return `Today ${formatClock(dateTime)}`;
-  }
-
-  if (tideDate === tomorrow) {
-    return `Tomorrow ${formatClock(dateTime)}`;
-  }
-
-  return `${tideDate} ${formatClock(dateTime)}`;
-}
-
-
-/* =========================================
-   TIDES
-   Station 8447636
-========================================= */
-
-async function loadTides() {
-
-  const today = getNOAADate();
-  const nowKey = getNowKey();
-
-  const url =
-    `${API}` +
-    `?begin_date=${today}` +
-    `&range=48` +
-    `&station=${TIDE_STATION}` +
-    `&product=predictions` +
-    `&datum=${DATUM}` +
-    `&time_zone=lst_ldt` +
-    `&interval=hilo` +
-    `&units=english` +
-    `&application=ExperienceBuilder` +
-    `&format=json`;
-
-  try {
-
-    const response = await fetch(url);
-    const data = await response.json();
-
-    const future =
-      data.predictions.filter(
-        tide => tide.t >= nowKey
-      );
-
-    const nextHigh =
-      future.find(
-        tide => tide.type === "H"
-      );
-
-    const nextLow =
-      future.find(
-        tide => tide.type === "L"
-      );
-
-
-    if (nextHigh) {
-
-      document.getElementById("highTide").textContent =
-        `${Number(nextHigh.v).toFixed(2)} ft · ${formatTideTime(nextHigh.t)}`;
-
-    }
-
-
-    if (nextLow) {
-
-      document.getElementById("lowTide").textContent =
-        `${Number(nextLow.v).toFixed(2)} ft · ${formatTideTime(nextLow.t)}`;
-
-    }
-
-  }
-
-  catch (error) {
-
-    document.getElementById("highTide").textContent =
-      "Unavailable";
-
-    document.getElementById("lowTide").textContent =
-      "Unavailable";
-
-  }
-
-}
-
-
-/* =========================================
-   AIR TEMPERATURE
-   Station 8447627
-========================================= */
-
-async function loadAirTemp() {
-
-  const url =
-    `${API}` +
-    `?date=latest` +
-    `&station=${WEATHER_STATION}` +
-    `&product=air_temperature` +
-    `&time_zone=lst_ldt` +
-    `&units=english` +
-    `&application=ExperienceBuilder` +
-    `&format=json`;
-
-  try {
-
-    const response = await fetch(url);
-    const data = await response.json();
-
-    if (data.data && data.data.length > 0) {
-
-      const temp = Number(data.data[0].v);
-
-      document.getElementById("airTemp").textContent =
-        `${temp.toFixed(1)}°F`;
-
-    }
-
-  }
-
-  catch (error) {
-
-    document.getElementById("airTemp").textContent =
-      "Unavailable";
-
-  }
-
-}
-
-
-/* =========================================
-   BAROMETRIC PRESSURE
-   Station 8447627
-========================================= */
-
-async function loadPressure() {
-
-  const url =
-    `${API}` +
-    `?date=latest` +
-    `&station=${WEATHER_STATION}` +
-    `&product=air_pressure` +
-    `&time_zone=lst_ldt` +
-    `&units=metric` +
-    `&application=ExperienceBuilder` +
-    `&format=json`;
-
-  try {
-
-    const response = await fetch(url);
-    const data = await response.json();
-
-    if (data.data && data.data.length > 0) {
-
-      const pressure = Number(data.data[0].v);
-
-      document.getElementById("pressure").textContent =
-        `${pressure.toFixed(1)} mb`;
-
-    }
-
-  }
-
-  catch (error) {
-
-    document.getElementById("pressure").textContent =
-      "Unavailable";
-
-  }
-
-}
-
-
-/* =========================================
-   WIND + GUST
-   Station 8447627
-========================================= */
-
-async function loadWind() {
-
-  const url =
-    `${API}` +
-    `?date=latest` +
-    `&station=${WEATHER_STATION}` +
-    `&product=wind` +
-    `&time_zone=lst_ldt` +
-    `&units=english` +
-    `&application=ExperienceBuilder` +
-    `&format=json`;
-
-  try {
-
-    const response = await fetch(url);
-    const data = await response.json();
-
-    if (data.data && data.data.length > 0) {
-
-      const latest = data.data[0];
-
-      const speed = Number(latest.s);
-      const gust = Number(latest.g);
-      const direction = latest.dr || "";
-
-      if (!isNaN(speed)) {
-
-        document.getElementById("wind").textContent =
-          `${speed.toFixed(1)} kts ${direction}`;
-
-      } else {
-
-        document.getElementById("wind").textContent =
-          "Unavailable";
-
-      }
-
-
-      if (!isNaN(gust)) {
-
-        document.getElementById("gust").textContent =
-          `${gust.toFixed(1)} kts ${direction}`;
-
-      } else {
-
-        document.getElementById("gust").textContent =
-          "Unavailable";
-
-      }
-
-    }
-
-  }
-
-  catch (error) {
-
-    document.getElementById("wind").textContent =
-      "Unavailable";
-
-    document.getElementById("gust").textContent =
-      "Unavailable";
-
-  }
-
-}
-
-
-/* =========================================
-   LOAD EVERYTHING
-========================================= */
-
-function loadEverything() {
-
-  loadTides();
-  loadAirTemp();
-  loadPressure();
-  loadWind();
-
-}
-
-
-/* Initial load */
-
-loadEverything();
-
-
-/* Refresh every 6 minutes */
-
-setInterval(
-  loadEverything,
-  6 * 60 * 1000
-);
-
-</script>
-
-</body>
-</html>
