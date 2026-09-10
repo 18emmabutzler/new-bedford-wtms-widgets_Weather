@@ -12,16 +12,16 @@
     font-family: Arial, Helvetica, sans-serif;
   }
 
-  .tide-line {
+  .info-line {
     display: flex;
     align-items: center;
-    gap: 20px;
+    gap: 10px;
     white-space: nowrap;
-    font-size: 14px;
-    padding: 4px;
+    font-size: 11px;
+    padding: 3px;
   }
 
-  .tide-label {
+  .label {
     font-weight: 700;
   }
 
@@ -33,29 +33,73 @@
 
 <body>
 
-<div class="tide-line">
+<div class="info-line">
+
+  <!-- TIDES -->
 
   <span>
-    <span class="tide-label">▲ Next High Tide:</span>
+    <span class="label">▲ High:</span>
     <span id="highTide">Loading...</span>
   </span>
 
   <span class="separator">|</span>
 
   <span>
-    <span class="tide-label">▼ Next Low Tide:</span>
+    <span class="label">▼ Low:</span>
     <span id="lowTide">Loading...</span>
+  </span>
+
+  <span class="separator">|</span>
+
+
+  <!-- WEATHER -->
+
+  <span>
+    <span class="label">🌡 Temp:</span>
+    <span id="airTemp">Loading...</span>
+  </span>
+
+  <span class="separator">|</span>
+
+  <span>
+    <span class="label">Pressure:</span>
+    <span id="pressure">Loading...</span>
+  </span>
+
+  <span class="separator">|</span>
+
+  <span>
+    <span class="label">💨 Wind:</span>
+    <span id="wind">Loading...</span>
+  </span>
+
+  <span class="separator">|</span>
+
+  <span>
+    <span class="label">Gust:</span>
+    <span id="gust">Loading...</span>
   </span>
 
 </div>
 
+
 <script>
 
-const STATION = "8447636";
+const API =
+  "https://api.tidesandcurrents.noaa.gov/api/prod/datagetter";
+
+/* NOAA STATIONS */
+
+const TIDE_STATION = "8447636";
+const WEATHER_STATION = "8447627";
+
 const DATUM = "MLLW";
-const API = "https://api.tidesandcurrents.noaa.gov/api/prod/datagetter";
 const TIMEZONE = "America/New_York";
 
+
+/* =========================================
+   DATE / TIME FUNCTIONS
+========================================= */
 
 function getDateParts() {
 
@@ -117,7 +161,7 @@ function formatClock(dateTime) {
 
 function formatTideTime(dateTime) {
 
-  const tideDate = dateTime.substring(0,10);
+  const tideDate = dateTime.substring(0, 10);
 
   const p = getDateParts();
 
@@ -125,7 +169,10 @@ function formatTideTime(dateTime) {
     `${p.year}-${p.month}-${p.day}`;
 
   const tomorrowDate = new Date();
-  tomorrowDate.setDate(tomorrowDate.getDate() + 1);
+
+  tomorrowDate.setDate(
+    tomorrowDate.getDate() + 1
+  );
 
   const tomorrowParts =
     new Intl.DateTimeFormat("en-US", {
@@ -157,6 +204,11 @@ function formatTideTime(dateTime) {
 }
 
 
+/* =========================================
+   TIDES
+   Station 8447636
+========================================= */
+
 async function loadTides() {
 
   const today = getNOAADate();
@@ -166,13 +218,13 @@ async function loadTides() {
     `${API}` +
     `?begin_date=${today}` +
     `&range=48` +
-    `&station=${STATION}` +
+    `&station=${TIDE_STATION}` +
     `&product=predictions` +
     `&datum=${DATUM}` +
     `&time_zone=lst_ldt` +
     `&interval=hilo` +
     `&units=english` +
-    `&application=ExperienceBuilder_TideLine` +
+    `&application=ExperienceBuilder` +
     `&format=json`;
 
   try {
@@ -226,10 +278,189 @@ async function loadTides() {
 }
 
 
-loadTides();
+/* =========================================
+   AIR TEMPERATURE
+   Station 8447627
+========================================= */
+
+async function loadAirTemp() {
+
+  const url =
+    `${API}` +
+    `?date=latest` +
+    `&station=${WEATHER_STATION}` +
+    `&product=air_temperature` +
+    `&time_zone=lst_ldt` +
+    `&units=english` +
+    `&application=ExperienceBuilder` +
+    `&format=json`;
+
+  try {
+
+    const response = await fetch(url);
+    const data = await response.json();
+
+    if (data.data && data.data.length > 0) {
+
+      const temp = Number(data.data[0].v);
+
+      document.getElementById("airTemp").textContent =
+        `${temp.toFixed(1)}°F`;
+
+    }
+
+  }
+
+  catch (error) {
+
+    document.getElementById("airTemp").textContent =
+      "Unavailable";
+
+  }
+
+}
+
+
+/* =========================================
+   BAROMETRIC PRESSURE
+   Station 8447627
+========================================= */
+
+async function loadPressure() {
+
+  const url =
+    `${API}` +
+    `?date=latest` +
+    `&station=${WEATHER_STATION}` +
+    `&product=air_pressure` +
+    `&time_zone=lst_ldt` +
+    `&units=metric` +
+    `&application=ExperienceBuilder` +
+    `&format=json`;
+
+  try {
+
+    const response = await fetch(url);
+    const data = await response.json();
+
+    if (data.data && data.data.length > 0) {
+
+      const pressure = Number(data.data[0].v);
+
+      document.getElementById("pressure").textContent =
+        `${pressure.toFixed(1)} mb`;
+
+    }
+
+  }
+
+  catch (error) {
+
+    document.getElementById("pressure").textContent =
+      "Unavailable";
+
+  }
+
+}
+
+
+/* =========================================
+   WIND + GUST
+   Station 8447627
+========================================= */
+
+async function loadWind() {
+
+  const url =
+    `${API}` +
+    `?date=latest` +
+    `&station=${WEATHER_STATION}` +
+    `&product=wind` +
+    `&time_zone=lst_ldt` +
+    `&units=english` +
+    `&application=ExperienceBuilder` +
+    `&format=json`;
+
+  try {
+
+    const response = await fetch(url);
+    const data = await response.json();
+
+    if (data.data && data.data.length > 0) {
+
+      const latest = data.data[0];
+
+      const speed = Number(latest.s);
+      const gust = Number(latest.g);
+      const direction = latest.dr || "";
+
+      if (!isNaN(speed)) {
+
+        document.getElementById("wind").textContent =
+          `${speed.toFixed(1)} kts ${direction}`;
+
+      } else {
+
+        document.getElementById("wind").textContent =
+          "Unavailable";
+
+      }
+
+
+      if (!isNaN(gust)) {
+
+        document.getElementById("gust").textContent =
+          `${gust.toFixed(1)} kts ${direction}`;
+
+      } else {
+
+        document.getElementById("gust").textContent =
+          "Unavailable";
+
+      }
+
+    }
+
+  }
+
+  catch (error) {
+
+    document.getElementById("wind").textContent =
+      "Unavailable";
+
+    document.getElementById("gust").textContent =
+      "Unavailable";
+
+  }
+
+}
+
+
+/* =========================================
+   LOAD EVERYTHING
+========================================= */
+
+function loadEverything() {
+
+  loadTides();
+  loadAirTemp();
+  loadPressure();
+  loadWind();
+
+}
+
+
+/* Initial load */
+
+loadEverything();
+
 
 /* Refresh every 6 minutes */
-setInterval(loadTides, 6 * 60 * 1000);
+
+setInterval(
+  loadEverything,
+  6 * 60 * 1000
+);
 
 </script>
 
