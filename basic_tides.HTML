@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: transparent;
+    font-family: Arial, Helvetica, sans-serif;
+  }
+
+  .tide-line {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    white-space: nowrap;
+    font-size: 14px;
+    padding: 4px;
+  }
+
+  .tide-label {
+    font-weight: 700;
+  }
+
+  .separator {
+    color: #999;
+  }
+</style>
+</head>
+
+<body>
+
+<div class="tide-line">
+
+  <span>
+    <span class="tide-label">▲ Next High Tide:</span>
+    <span id="highTide">Loading...</span>
+  </span>
+
+  <span class="separator">|</span>
+
+  <span>
+    <span class="tide-label">▼ Next Low Tide:</span>
+    <span id="lowTide">Loading...</span>
+  </span>
+
+</div>
+
+<script>
+
+const STATION = "8447636";
+const DATUM = "MLLW";
+const API = "https://api.tidesandcurrents.noaa.gov/api/prod/datagetter";
+const TIMEZONE = "America/New_York";
+
+
+function getDateParts() {
+
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: TIMEZONE,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false
+  }).formatToParts(new Date());
+
+  const result = {};
+
+  parts.forEach(part => {
+    result[part.type] = part.value;
+  });
+
+  return result;
+}
+
+
+function getNOAADate() {
+
+  const p = getDateParts();
+
+  return `${p.year}${p.month}${p.day}`;
+}
+
+
+function getNowKey() {
+
+  const p = getDateParts();
+
+  return `${p.year}-${p.month}-${p.day} ${p.hour}:${p.minute}`;
+}
+
+
+function formatClock(dateTime) {
+
+  const pieces = dateTime.split(" ");
+  const time = pieces[1].split(":");
+
+  let hour = parseInt(time[0], 10);
+  const minute = time[1];
+
+  const suffix = hour >= 12 ? "PM" : "AM";
+
+  hour = hour % 12;
+
+  if (hour === 0) {
+    hour = 12;
+  }
+
+  return `${hour}:${minute} ${suffix}`;
+}
+
+
+function formatTideTime(dateTime) {
+
+  const tideDate = dateTime.substring(0,10);
+
+  const p = getDateParts();
+
+  const today =
+    `${p.year}-${p.month}-${p.day}`;
+
+  const tomorrowDate = new Date();
+  tomorrowDate.setDate(tomorrowDate.getDate() + 1);
+
+  const tomorrowParts =
+    new Intl.DateTimeFormat("en-US", {
+      timeZone: TIMEZONE,
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit"
+    }).formatToParts(tomorrowDate);
+
+  const tomorrowObj = {};
+
+  tomorrowParts.forEach(part => {
+    tomorrowObj[part.type] = part.value;
+  });
+
+  const tomorrow =
+    `${tomorrowObj.year}-${tomorrowObj.month}-${tomorrowObj.day}`;
+
+
+  if (tideDate === today) {
+    return `Today ${formatClock(dateTime)}`;
+  }
+
+  if (tideDate === tomorrow) {
+    return `Tomorrow ${formatClock(dateTime)}`;
+  }
+
+  return `${tideDate} ${formatClock(dateTime)}`;
+}
+
+
+async function loadTides() {
+
+  const today = getNOAADate();
+  const nowKey = getNowKey();
+
+  const url =
+    `${API}` +
+    `?begin_date=${today}` +
+    `&range=48` +
+    `&station=${STATION}` +
+    `&product=predictions` +
+    `&datum=${DATUM}` +
+    `&time_zone=lst_ldt` +
+    `&interval=hilo` +
+    `&units=english` +
+    `&application=ExperienceBuilder_TideLine` +
+    `&format=json`;
+
+  try {
+
+    const response = await fetch(url);
+    const data = await response.json();
+
+    const future =
+      data.predictions.filter(
+        tide => tide.t >= nowKey
+      );
+
+    const nextHigh =
+      future.find(
+        tide => tide.type === "H"
+      );
+
+    const nextLow =
+      future.find(
+        tide => tide.type === "L"
+      );
+
+
+    if (nextHigh) {
+
+      document.getElementById("highTide").textContent =
+        `${Number(nextHigh.v).toFixed(2)} ft · ${formatTideTime(nextHigh.t)}`;
+
+    }
+
+
+    if (nextLow) {
+
+      document.getElementById("lowTide").textContent =
+        `${Number(nextLow.v).toFixed(2)} ft · ${formatTideTime(nextLow.t)}`;
+
+    }
+
+  }
+
+  catch (error) {
+
+    document.getElementById("highTide").textContent =
+      "Unavailable";
+
+    document.getElementById("lowTide").textContent =
+      "Unavailable";
+
+  }
+
+}
+
+
+loadTides();
+
+/* Refresh every 6 minutes */
+setInterval(loadTides, 6 * 60 * 1000);
+
+</script>
+
+</body>
+</html>
