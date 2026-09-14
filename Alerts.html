@@ -1,292 +1,104 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
->
-
-<title>Buzzards Bay Marine Conditions</title>
-
+<title>New Bedford Weather</title>
 
 <style>
-
-/* =========================================================
-   BASE
-========================================================= */
 
 * {
     box-sizing: border-box;
 }
 
-html,
-body {
+html, body {
     margin: 0;
     padding: 0;
-
     background: transparent;
-
-    font-family:
-        Arial,
-        Helvetica,
-        sans-serif;
-
+    font-family: Arial, Helvetica, sans-serif;
     color: #17233b;
 }
 
-.wrapper {
+.weather-card {
     width: 100%;
-}
-
-
-/* =========================================================
-   ACTIVE ALERT
-========================================================= */
-
-.alert-banner {
-
-    width: 100%;
-
     background: #ffffff;
-
     border: 1px solid #d9d9d9;
-
-    border-left: 7px solid #c62828;
-
-    border-radius: 9px;
-
+    border-radius: 8px;
     overflow: hidden;
 }
 
 
 /* =========================================================
-   ALERT HEADER
+   HEADER
 ========================================================= */
 
-.alert-header {
-
-    background: #c62828;
-
-    color: #ffffff;
-
-    padding: 14px 17px;
-}
-
-
-.alert-eyebrow {
-
-    font-size: 10px;
-
-    font-weight: 700;
-
-    letter-spacing: 0.8px;
-
-    opacity: 0.9;
-}
-
-
-.alert-title {
-
-    margin-top: 3px;
-
-    font-size: 23px;
-
-    font-weight: 700;
-
-    line-height: 1.2;
-}
-
-
-/* ISSUED / ENDS */
-
-.alert-dates {
-
-    margin-top: 7px;
-
+.header {
+    padding: 8px 10px 7px 10px;
     display: flex;
-
+    justify-content: space-between;
     align-items: center;
-
-    flex-wrap: wrap;
-
-    gap: 7px;
-
-    font-size: 11px;
-
-    color: #ffffff;
+    border-bottom: 1px solid #e5e5e5;
 }
 
+.title {
+    font-size: 14px;
+    font-weight: 700;
+}
 
-.alert-dates strong {
+.subtitle {
+    margin-top: 2px;
+    font-size: 8px;
+    color: #777;
+}
+
+.badge {
+    padding: 3px 5px;
+    border: 1px solid #aaa;
+    border-radius: 3px;
+    font-size: 8px;
     font-weight: 700;
 }
 
 
-.date-divider {
-    opacity: 0.6;
-}
-
-
 /* =========================================================
-   ALERT CONTENT
+   CURRENT CONDITIONS
 ========================================================= */
 
-.alert-content {
-
-    padding:
-        14px 16px 15px 16px;
-}
-
-
-.alert-grid {
-
+.current-grid {
     display: grid;
-
-    grid-template-columns:
-        1fr 1fr;
-
-    border:
-        1px solid #e1e1e1;
-
-    border-radius: 7px;
-
-    overflow: hidden;
+    grid-template-columns: repeat(4, 1fr);
+    border-bottom: 1px solid #ddd;
 }
 
-
-.alert-item {
-
-    padding:
-        11px 12px;
-
-    border-bottom:
-        1px solid #e8e8e8;
+.current-item {
+    padding: 7px 5px;
+    text-align: center;
+    border-right: 1px solid #e5e5e5;
 }
 
-
-.alert-item:nth-child(odd) {
-
-    border-right:
-        1px solid #e8e8e8;
+.current-item:last-child {
+    border-right: none;
 }
 
-
-.alert-item:nth-last-child(-n+2) {
-
-    border-bottom:
-        none;
+.label {
+    font-size: 7px;
+    color: #777;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
 }
 
-
-.alert-label {
-
-    margin-bottom: 4px;
-
-    color: #777777;
-
-    font-size: 9px;
-
+.value {
+    margin-top: 3px;
+    font-size: 13px;
     font-weight: 700;
-
-    letter-spacing: 0.5px;
+    color: #0b1f3a;
 }
 
-
-.alert-value {
-
-    color: #17233b;
-
-    font-size: 12px;
-
-    line-height: 1.45;
-}
-
-
-/* =========================================================
-   SAFETY BOX
-========================================================= */
-
-.safety-box {
-
-    margin-top: 10px;
-
-    padding:
-        10px 12px;
-
-    background: #fff5f5;
-
-    border:
-        1px solid #f0cccc;
-
-    border-radius: 6px;
-}
-
-
-.safety-title {
-
-    color: #a61b1b;
-
-    font-size: 9px;
-
-    font-weight: 700;
-
-    letter-spacing: 0.4px;
-}
-
-
-.safety-text {
-
-    margin-top: 4px;
-
-    color: #555555;
-
-    font-size: 11px;
-
-    line-height: 1.45;
-}
-
-
-/* =========================================================
-   NO ALERT STATE
-========================================================= */
-
-.alert-banner.no-alert {
-
-    border-left-color:
-        #718096;
-}
-
-
-.alert-banner.no-alert
-.alert-header {
-
-    background:
-        #4b6478;
-}
-
-
-/* =========================================================
-   FORECAST CARD
-========================================================= */
-
-.forecast-card {
-
-    margin-top: 12px;
-
-    padding:
-        14px 16px;
-
-    background:
-        #ffffff;
-
-    border:
-        1px solid #d9d9d9;
-
-    border-radius: 9px;
+.small-value {
+    margin-top: 2px;
+    font-size: 7px;
+    color: #777;
 }
 
 
@@ -294,225 +106,120 @@ body {
    FORECAST HEADER
 ========================================================= */
 
-.forecast-header {
-
+.forecast-heading {
+    padding: 7px 9px 5px 9px;
     display: flex;
-
-    justify-content:
-        space-between;
-
-    align-items:
-        flex-start;
-
-    gap: 10px;
-
-    margin-bottom: 11px;
+    justify-content: space-between;
+    align-items: center;
 }
 
-
-.forecast-title {
-
-    color: #17233b;
-
-    font-size: 17px;
-
-    font-weight: 700;
-}
-
-
-.forecast-subtitle {
-
-    margin-top: 3px;
-
-    color: #777777;
-
+.forecast-heading-title {
     font-size: 10px;
+    font-weight: 700;
 }
 
-
-.zone-badge {
-
-    padding:
-        4px 7px;
-
-    border:
-        1px solid #aaaaaa;
-
-    border-radius: 4px;
-
-    color: #17233b;
-
-    font-size: 9px;
-
-    font-weight: 700;
-
-    white-space: nowrap;
+.updated {
+    font-size: 7px;
+    color: #888;
 }
 
 
 /* =========================================================
-   MARINE METRICS
+   3 DAY FORECAST
 ========================================================= */
 
-.marine-grid {
-
+.forecast-grid {
     display: grid;
-
-    grid-template-columns:
-        repeat(4, 1fr);
-
-    border:
-        1px solid #dddddd;
-
-    border-radius: 7px;
-
-    overflow: hidden;
+    grid-template-columns: repeat(3, 1fr);
+    padding: 0 7px 7px 7px;
+    gap: 5px;
 }
 
-
-.marine-item {
-
-    min-width: 0;
-
-    padding:
-        11px 10px;
-
-    text-align: center;
-
-    border-right:
-        1px solid #e5e5e5;
+.day {
+    padding: 6px;
+    background: #f5f6f7;
+    border: 1px solid #ddd;
+    border-radius: 5px;
 }
 
-
-.marine-item:last-child {
-
-    border-right:
-        none;
-}
-
-
-.marine-label {
-
-    color: #777777;
-
-    font-size: 9px;
-
-    text-transform: uppercase;
-
-    letter-spacing: 0.3px;
-}
-
-
-.marine-value {
-
-    margin-top: 5px;
-
-    color: #0b1f3a;
-
-    font-size: 14px;
-
-    font-weight: 700;
-
-    line-height: 1.4;
-}
-
-
-/* =========================================================
-   FORECAST DESCRIPTION
-========================================================= */
-
-.forecast-description {
-
-    margin-top: 10px;
-
-    padding:
-        10px 12px;
-
-    background:
-        #f5f6f7;
-
-    border-radius: 6px;
-
-    color: #444444;
-
-    font-size: 11px;
-
-    line-height: 1.5;
-}
-
-
-/* TONIGHT GETS SLIGHT RED TINT */
-
-.tonight-card
-.forecast-description {
-
-    background:
-        #fff7f7;
-
-    border:
-        1px solid #f0dddd;
-}
-
-
-/* =========================================================
-   NWS LINK
-========================================================= */
-
-.forecast-link {
-
-    display: block;
-
-    margin-top: 10px;
-
-    padding:
-        9px 10px;
-
-    background:
-        #074b78;
-
-    color:
-        #ffffff;
-
-    border-radius: 6px;
-
-    text-align: center;
-
-    text-decoration: none;
-
+.day-name {
     font-size: 10px;
-
     font-weight: 700;
 }
 
+.day-date {
+    margin-top: 1px;
+    font-size: 7px;
+    color: #888;
+}
 
-.forecast-link:hover {
+.temp-row {
+    margin-top: 4px;
+    display: flex;
+    align-items: baseline;
+    gap: 5px;
+}
 
-    background:
-        #063a5d;
+.high {
+    font-size: 16px;
+    font-weight: 700;
+}
+
+.low {
+    font-size: 9px;
+    color: #777;
+}
+
+.description {
+    margin-top: 3px;
+    min-height: 20px;
+    font-size: 8px;
+    font-weight: 600;
+    line-height: 1.25;
+}
+
+.details {
+    margin-top: 4px;
+    padding-top: 4px;
+    border-top: 1px solid #ddd;
+}
+
+.detail {
+    display: flex;
+    justify-content: space-between;
+    gap: 4px;
+    margin-top: 2px;
+    font-size: 7px;
+}
+
+.detail-label {
+    color: #777;
+}
+
+.detail-value {
+    font-weight: 600;
+    text-align: right;
 }
 
 
 /* =========================================================
-   FOOTER
+   FOOTER LINK
 ========================================================= */
 
 .footer {
+    padding: 0 7px 7px 7px;
+}
 
-    margin-top: 8px;
-
-    display: flex;
-
-    justify-content:
-        space-between;
-
-    flex-wrap: wrap;
-
-    gap: 10px;
-
-    color:
-        #777777;
-
-    font-size: 9px;
+.link {
+    display: block;
+    padding: 5px;
+    background: #074b78;
+    border-radius: 4px;
+    color: white;
+    text-align: center;
+    text-decoration: none;
+    font-size: 8px;
+    font-weight: 700;
 }
 
 
@@ -520,449 +227,106 @@ body {
    MOBILE
 ========================================================= */
 
-@media
-(max-width: 550px) {
+@media (max-width: 450px) {
 
-    .alert-grid {
-
-        grid-template-columns:
-            1fr;
+    .current-grid {
+        grid-template-columns: repeat(2, 1fr);
     }
 
-
-    .alert-item {
-
-        border-right:
-            none !important;
-
-        border-bottom:
-            1px solid #e8e8e8 !important;
-    }
-
-
-    .alert-item:last-child {
-
-        border-bottom:
-            none !important;
-    }
-
-
-    .marine-grid {
-
-        grid-template-columns:
-            1fr 1fr;
-    }
-
-
-    .marine-item {
-
-        border-bottom:
-            1px solid #e5e5e5;
-    }
-
-
-    .marine-item:nth-child(2n) {
-
-        border-right:
-            none;
-    }
-
-
-    .marine-item:nth-last-child(-n+2) {
-
-        border-bottom:
-            none;
-    }
-
-
-    .date-divider {
-
-        display: none;
+    .forecast-grid {
+        grid-template-columns: 1fr;
     }
 
 }
 
 </style>
-
 </head>
 
 
 <body>
 
+<div class="weather-card">
 
-<div class="wrapper">
 
+    <!-- HEADER -->
 
-<!-- =========================================================
-     ACTIVE MARINE ALERT
-========================================================= -->
-
-
-<div
-    id="alertBanner"
-    class="alert-banner"
->
-
-
-    <!-- =====================================================
-         RED ALERT HEADER
-    ====================================================== -->
-
-    <div class="alert-header">
-
-
-        <div class="alert-eyebrow">
-
-            ACTIVE MARINE ALERT · BUZZARDS BAY
-
-        </div>
-
-
-        <div
-            id="alertTitle"
-            class="alert-title"
-        >
-
-            Checking Marine Alerts...
-
-        </div>
-
-
-        <div class="alert-dates">
-
-
-            <span>
-
-                <strong>
-                    Issued:
-                </strong>
-
-                <span id="alertIssued">
-                    --
-                </span>
-
-            </span>
-
-
-            <span class="date-divider">
-
-                |
-
-            </span>
-
-
-            <span>
-
-                <strong>
-                    Ends:
-                </strong>
-
-                <span id="alertEnds">
-                    --
-                </span>
-
-            </span>
-
-
-        </div>
-
-
-    </div>
-
-
-
-    <!-- =====================================================
-         ALERT DETAILS
-    ====================================================== -->
-
-    <div class="alert-content">
-
-
-        <div class="alert-grid">
-
-
-            <!-- WHAT -->
-
-            <div class="alert-item">
-
-
-                <div class="alert-label">
-
-                    WHAT
-
-                </div>
-
-
-                <div
-                    id="alertWhat"
-                    class="alert-value"
-                >
-
-                    Loading...
-
-                </div>
-
-
-            </div>
-
-
-
-            <!-- WHEN -->
-
-            <div class="alert-item">
-
-
-                <div class="alert-label">
-
-                    WHEN
-
-                </div>
-
-
-                <div
-                    id="alertWhen"
-                    class="alert-value"
-                >
-
-                    Loading...
-
-                </div>
-
-
-            </div>
-
-
-
-            <!-- WHERE -->
-
-            <div class="alert-item">
-
-
-                <div class="alert-label">
-
-                    WHERE
-
-                </div>
-
-
-                <div
-                    id="alertWhere"
-                    class="alert-value"
-                >
-
-                    Loading...
-
-                </div>
-
-
-            </div>
-
-
-
-            <!-- IMPACTS -->
-
-            <div class="alert-item">
-
-
-                <div class="alert-label">
-
-                    IMPACTS
-
-                </div>
-
-
-                <div
-                    id="alertImpacts"
-                    class="alert-value"
-                >
-
-                    Loading...
-
-                </div>
-
-
-            </div>
-
-
-        </div>
-
-
-
-        <!-- =================================================
-             PRECAUTIONARY / PREPAREDNESS ACTIONS
-        ================================================== -->
-
-        <div
-            id="safetyBox"
-            class="safety-box"
-        >
-
-
-            <div class="safety-title">
-
-                PRECAUTIONARY / PREPAREDNESS ACTIONS
-
-            </div>
-
-
-            <div
-                id="safetyText"
-                class="safety-text"
-            >
-
-                Loading National Weather Service guidance...
-
-            </div>
-
-
-        </div>
-
-
-    </div>
-
-
-</div>
-
-
-
-<!-- =========================================================
-     TONIGHT FORECAST
-========================================================= -->
-
-
-<div class="forecast-card tonight-card">
-
-
-    <div class="forecast-header">
-
+    <div class="header">
 
         <div>
-
-
-            <div class="forecast-title">
-
-                Tonight
-
+            <div class="title">
+                New Bedford Harbor Weather
             </div>
 
-
-            <div class="forecast-subtitle">
-
-                Buzzards Bay · National Weather Service
-
+            <div id="stationName" class="subtitle">
+                Current Conditions
             </div>
-
-
         </div>
 
-
-        <div class="zone-badge">
-
-            ANZ234
-
+        <div class="badge">
+            NWS
         </div>
-
 
     </div>
 
 
 
-    <!-- =====================================================
-         TONIGHT METRICS
-    ====================================================== -->
+    <!-- CURRENT CONDITIONS -->
 
-    <div class="marine-grid">
+    <div class="current-grid">
 
 
-        <!-- WIND -->
+        <div class="current-item">
 
-        <div class="marine-item">
+            <div class="label">
+                Temperature
+            </div>
+
+            <div id="temperature" class="value">
+                --
+            </div>
+
+        </div>
 
 
-            <div class="marine-label">
+        <div class="current-item">
 
+            <div class="label">
+                Pressure
+            </div>
+
+            <div id="pressure" class="value">
+                --
+            </div>
+
+        </div>
+
+
+        <div class="current-item">
+
+            <div class="label">
                 Wind
-
             </div>
 
-
-            <div class="marine-value">
-
-                N 10–15 kt
-
+            <div id="wind" class="value">
+                --
             </div>
 
+            <div id="windDirection" class="small-value">
+                --
+            </div>
 
         </div>
 
 
+        <div class="current-item">
 
-        <!-- GUSTS -->
-
-        <div class="marine-item">
-
-
-            <div class="marine-label">
-
-                Gusts
-
+            <div class="label">
+                Gust
             </div>
 
-
-            <div class="marine-value">
-
-                Up to 20 kt
-
+            <div id="gust" class="value">
+                --
             </div>
-
-
-        </div>
-
-
-
-        <!-- SEAS -->
-
-        <div class="marine-item">
-
-
-            <div class="marine-label">
-
-                Seas
-
-            </div>
-
-
-            <div class="marine-value">
-
-                2–3 ft
-
-            </div>
-
-
-        </div>
-
-
-
-        <!-- WAVES -->
-
-        <div class="marine-item">
-
-
-            <div class="marine-label">
-
-                Wave Detail
-
-            </div>
-
-
-            <div class="marine-value">
-
-                N 1 ft @ 5 sec
-                <br>
-                SE 1 ft @ 9 sec
-
-            </div>
-
 
         </div>
 
@@ -971,229 +335,56 @@ body {
 
 
 
-    <div class="forecast-description">
+    <!-- FORECAST HEADER -->
 
-        <strong>Tonight:</strong>
+    <div class="forecast-heading">
 
-        N winds 10 to 15 kt with gusts up to 20 kt.
-        Seas 2 to 3 ft.
-        Wave detail: N 1 foot at 5 seconds and
-        SE 1 foot at 9 seconds.
-
-    </div>
-
-
-</div>
-
-
-
-<!-- =========================================================
-     TUESDAY MARINE FORECAST
-========================================================= -->
-
-
-<div class="forecast-card">
-
-
-    <div class="forecast-header">
-
-
-        <div>
-
-
-            <div class="forecast-title">
-
-                Tuesday Marine Forecast
-
-            </div>
-
-
-            <div class="forecast-subtitle">
-
-                Buzzards Bay · National Weather Service
-
-            </div>
-
-
+        <div class="forecast-heading-title">
+            3-Day Forecast
         </div>
 
-
-        <div class="zone-badge">
-
-            ANZ234
-
+        <div id="updated" class="updated">
+            Updating...
         </div>
-
 
     </div>
 
 
 
-    <!-- =====================================================
-         TUESDAY METRICS
-    ====================================================== -->
+    <!-- FORECAST -->
 
-    <div class="marine-grid">
+    <div id="forecastGrid" class="forecast-grid">
 
-
-        <!-- WIND -->
-
-        <div class="marine-item">
-
-
-            <div class="marine-label">
-
-                Wind
-
-            </div>
-
-
-            <div class="marine-value">
-
-                NE 5–10 kt
-
-            </div>
-
-
+        <div class="day">
+            Loading...
         </div>
 
-
-
-        <!-- GUSTS -->
-
-        <div class="marine-item">
-
-
-            <div class="marine-label">
-
-                Gusts
-
-            </div>
-
-
-            <div class="marine-value">
-
-                Up to 20 kt
-                <br>
-                Morning
-
-            </div>
-
-
+        <div class="day">
+            Loading...
         </div>
 
-
-
-        <!-- SEAS -->
-
-        <div class="marine-item">
-
-
-            <div class="marine-label">
-
-                Seas
-
-            </div>
-
-
-            <div class="marine-value">
-
-                ~2 ft AM
-                <br>
-                ≤1 ft later
-
-            </div>
-
-
+        <div class="day">
+            Loading...
         </div>
-
-
-
-        <!-- WAVES -->
-
-        <div class="marine-item">
-
-
-            <div class="marine-label">
-
-                Wave Detail
-
-            </div>
-
-
-            <div class="marine-value">
-
-                NE 1 ft @ 2 sec
-                <br>
-                NW 1 ft @ 5 sec
-
-            </div>
-
-
-        </div>
-
 
     </div>
 
 
 
-    <!-- =====================================================
-         FULL TUESDAY FORECAST
-    ====================================================== -->
-
-    <div class="forecast-description">
-
-        <strong>Tuesday:</strong>
-
-        NE winds 5 to 10 kt.
-        Gusts up to 20 kt in the morning.
-        Seas around 2 ft in the morning, then 1 foot or less.
-        Wave detail: NE 1 foot at 2 seconds and
-        NW 1 foot at 5 seconds, becoming NE 1 foot at
-        2 seconds and NW 1 foot at 4 seconds.
-
-    </div>
-
-
-
-    <!-- =====================================================
-         NWS LINK
-    ====================================================== -->
-
-    <a
-        class="forecast-link"
-        href="https://marine.weather.gov/MapClick.php?zoneid=anz234"
-        target="_blank"
-        rel="noopener noreferrer"
-    >
-
-        View Full Buzzards Bay Marine Forecast
-
-    </a>
-
-
+    <!-- LINK -->
 
     <div class="footer">
 
-
-        <span>
-
-            Source: National Weather Service
-
-        </span>
-
-
-        <span id="updated">
-
-            Updating...
-
-        </span>
-
+        <a
+            class="link"
+            href="https://forecast.weather.gov/MapClick.php?lat=41.628&lon=-70.908"
+            target="_blank"
+            rel="noopener noreferrer"
+        >
+            Full NWS Forecast
+        </a>
 
     </div>
-
-
-</div>
 
 
 </div>
@@ -1202,844 +393,594 @@ body {
 
 <script>
 
-
 /* =========================================================
    SETTINGS
 ========================================================= */
 
-
-const ZONE =
-    "ANZ234";
-
+const LATITUDE = 41.628;
+const LONGITUDE = -70.908;
 
 const TIMEZONE =
     "America/New_York";
 
-
-const ALERT_URL =
-    `https://api.weather.gov/alerts/active/zone/${ZONE}`;
-
+const POINT_URL =
+    `https://api.weather.gov/points/${LATITUDE},${LONGITUDE}`;
 
 
 /* =========================================================
-   CLEAN TEXT
+   NWS FETCH
 ========================================================= */
 
+async function fetchNWS(url) {
 
-function cleanText(
-    text
-) {
-
-
-    if (!text) {
-
-        return "";
-
-    }
-
-
-    return text
-
-        .replace(
-            /\r/g,
-            ""
-        )
-
-        .replace(
-            /\t/g,
-            " "
-        )
-
-        .replace(
-            /\n+/g,
-            " "
-        )
-
-        .replace(
-            /\s+/g,
-            " "
-        )
-
-        .trim();
-
-}
-
-
-
-/* =========================================================
-   FORMAT NWS DATE / TIME
-========================================================= */
-
-
-function formatDateTime(
-    dateString
-) {
-
-
-    if (!dateString) {
-
-        return "";
-
-    }
-
-
-    const date =
-        new Date(
-            dateString
+    const response =
+        await fetch(
+            url,
+            {
+                headers: {
+                    "Accept":
+                        "application/geo+json"
+                }
+            }
         );
 
+    if (!response.ok) {
+        throw new Error(
+            `NWS request failed: ${response.status}`
+        );
+    }
 
-    return date.toLocaleString(
-
-        "en-US",
-
-        {
-
-            timeZone:
-                TIMEZONE,
-
-            weekday:
-                "short",
-
-            month:
-                "short",
-
-            day:
-                "numeric",
-
-            hour:
-                "numeric",
-
-            minute:
-                "2-digit",
-
-            hour12:
-                true
-
-        }
-
-    );
-
+    return await response.json();
 }
 
 
-
 /* =========================================================
-   ALERT PRIORITY
+   CONVERSIONS
 ========================================================= */
 
-
-function getAlertPriority(
-    alert
-) {
-
-
-    const event =
-
-        (
-            alert.event ||
-            ""
-        )
-
-        .toLowerCase();
-
-
+function cToF(c) {
 
     if (
-        event.includes(
-            "warning"
-        )
+        c === null ||
+        c === undefined
     ) {
-
-        return 1;
-
+        return null;
     }
 
-
-    if (
-        event.includes(
-            "watch"
-        )
-    ) {
-
-        return 2;
-
-    }
-
-
-    if (
-        event.includes(
-            "advisory"
-        )
-    ) {
-
-        return 3;
-
-    }
-
-
-    return 4;
-
+    return (c * 9 / 5) + 32;
 }
 
 
+function paToMb(pa) {
 
-/* =========================================================
-   EXTRACT NWS ALERT SECTION
-========================================================= */
-
-
-function extractSection(
-    text,
-    section
-) {
-
-
-    if (!text) {
-
-        return "";
-
+    if (
+        pa === null ||
+        pa === undefined
+    ) {
+        return null;
     }
 
-
-    const sections =
-
-        "WHAT|WHERE|WHEN|IMPACTS|ADDITIONAL DETAILS";
-
-
-    /*
-       NWS format:
-
-       * WHAT...
-       * WHERE...
-       * WHEN...
-       * IMPACTS...
-    */
-
-
-    const regex =
-
-        new RegExp(
-
-            `\\*\\s*${section}\\.\\.\\.([\\s\\S]*?)(?=\\*\\s*(?:${sections})\\.\\.\\.|PRECAUTIONARY\\/PREPAREDNESS ACTIONS|&&|\\$\\$|$)`,
-
-            "i"
-
-        );
-
-
-    const match =
-        text.match(
-            regex
-        );
-
-
-    if (!match) {
-
-        return "";
-
-    }
-
-
-    return cleanText(
-        match[1]
-    );
-
+    return pa / 100;
 }
 
 
+function kmhToKnots(kmh) {
+
+    if (
+        kmh === null ||
+        kmh === undefined
+    ) {
+        return null;
+    }
+
+    return kmh * 0.539957;
+}
+
 
 /* =========================================================
-   LOAD ACTIVE ALERT
+   WIND DIRECTION
 ========================================================= */
 
+function degreesToCardinal(degrees) {
 
-async function loadAlert() {
+    if (
+        degrees === null ||
+        degrees === undefined
+    ) {
+        return "--";
+    }
+
+    const directions = [
+        "N",
+        "NNE",
+        "NE",
+        "ENE",
+        "E",
+        "ESE",
+        "SE",
+        "SSE",
+        "S",
+        "SSW",
+        "SW",
+        "WSW",
+        "W",
+        "WNW",
+        "NW",
+        "NNW"
+    ];
+
+    return directions[
+        Math.round(degrees / 22.5) % 16
+    ];
+}
 
 
-    const banner =
+/* =========================================================
+   CURRENT CONDITIONS
+========================================================= */
 
-        document.getElementById(
-            "alertBanner"
-        );
-
+async function loadCurrent(pointData) {
 
     try {
 
+        const stationURL =
+            pointData.properties
+                .observationStations;
 
-        const response =
-
-            await fetch(
-
-                ALERT_URL,
-
-                {
-
-                    headers: {
-
-                        "Accept":
-                            "application/geo+json"
-
-                    }
-
-                }
-
+        const stationData =
+            await fetchNWS(
+                stationURL
             );
 
+        const station =
+            stationData.features[0];
 
-        if (!response.ok) {
+        const stationID =
+            station.properties
+                .stationIdentifier;
 
-            throw new Error(
-                "NWS alert request failed"
-            );
-
-        }
-
-
-        const data =
-            await response.json();
-
-
-        const alerts =
-
-            (
-                data.features ||
-                []
-            )
-
-            .map(
-
-                feature =>
-                    feature.properties
-
-            )
-
-            .sort(
-
-                (a, b) =>
-
-                    getAlertPriority(a) -
-                    getAlertPriority(b)
-
-            );
-
-
-
-        /* =================================================
-           NO ACTIVE ALERT
-        ================================================= */
-
-
-        if (!alerts.length) {
-
-
-            banner.classList.add(
-                "no-alert"
-            );
-
-
-            document.getElementById(
-                "alertTitle"
-            ).textContent =
-
-                "No Active Marine Alerts";
-
-
-            document.getElementById(
-                "alertIssued"
-            ).textContent =
-
-                "None";
-
-
-            document.getElementById(
-                "alertEnds"
-            ).textContent =
-
-                "None";
-
-
-            document.getElementById(
-                "alertWhat"
-            ).textContent =
-
-                "No active marine hazard currently reported.";
-
-
-            document.getElementById(
-                "alertWhen"
-            ).textContent =
-
-                "None currently in effect.";
-
-
-            document.getElementById(
-                "alertWhere"
-            ).textContent =
-
-                "Buzzards Bay · ANZ234";
-
-
-            document.getElementById(
-                "alertImpacts"
-            ).textContent =
-
-                "No marine impacts currently reported.";
-
-
-            document.getElementById(
-                "safetyBox"
-            ).style.display =
-
-                "none";
-
-
-            return;
-
-        }
-
-
-
-        /* =================================================
-           ACTIVE ALERT
-        ================================================= */
-
-
-        banner.classList.remove(
-            "no-alert"
-        );
-
+        const stationName =
+            station.properties.name ||
+            stationID;
 
         document.getElementById(
-            "safetyBox"
-        ).style.display =
-
-            "block";
-
-
-        const alert =
-            alerts[0];
-
-
-
-        /* =================================================
-           ALERT TITLE
-        ================================================= */
-
-
-        document.getElementById(
-            "alertTitle"
+            "stationName"
         ).textContent =
-
-            alert.event ||
-
-            "Marine Weather Alert";
+            `Current Conditions · ${stationName}`;
 
 
-
-        /* =================================================
-           ISSUED TIME
-
-           NWS "sent" is preferred because it represents
-           when the alert message was issued.
-        ================================================= */
-
-
-        const issuedTime =
-
-            alert.sent ||
-
-            alert.effective ||
-
-            alert.onset;
-
-
-        if (issuedTime) {
-
-
-            document.getElementById(
-                "alertIssued"
-            ).textContent =
-
-                formatDateTime(
-                    issuedTime
-                );
-
-
-        }
-
-        else {
-
-
-            document.getElementById(
-                "alertIssued"
-            ).textContent =
-
-                "Not reported";
-
-        }
-
-
-
-        /* =================================================
-           END TIME
-        ================================================= */
-
-
-        const endTime =
-
-            alert.ends ||
-
-            alert.expires;
-
-
-        if (endTime) {
-
-
-            document.getElementById(
-                "alertEnds"
-            ).textContent =
-
-                formatDateTime(
-                    endTime
-                );
-
-
-        }
-
-        else {
-
-
-            document.getElementById(
-                "alertEnds"
-            ).textContent =
-
-                "Until further notice";
-
-        }
-
-
-
-        /* =================================================
-           ALERT DESCRIPTION
-        ================================================= */
-
-
-        const description =
-
-            alert.description ||
-
-            "";
-
-
-
-        /* =================================================
-           WHAT
-        ================================================= */
-
-
-        const what =
-
-            extractSection(
-
-                description,
-
-                "WHAT"
-
+        const observation =
+            await fetchNWS(
+                `https://api.weather.gov/stations/${stationID}/observations/latest`
             );
 
+        const obs =
+            observation.properties;
+
+
+        /* TEMPERATURE */
+
+        const temp =
+            cToF(
+                obs.temperature?.value
+            );
 
         document.getElementById(
-            "alertWhat"
+            "temperature"
         ).textContent =
-
-            what ||
-
-            alert.headline ||
-
-            "See National Weather Service alert information.";
+            temp !== null
+                ? `${temp.toFixed(0)}°F`
+                : "--";
 
 
+        /* PRESSURE */
 
-        /* =================================================
-           WHEN
-        ================================================= */
-
-
-        const when =
-
-            extractSection(
-
-                description,
-
-                "WHEN"
-
+        const mb =
+            paToMb(
+                obs.barometricPressure?.value
             );
-
 
         document.getElementById(
-            "alertWhen"
+            "pressure"
         ).textContent =
+            mb !== null
+                ? `${mb.toFixed(0)} mb`
+                : "--";
 
-            when ||
 
-            (
-                endTime
+        /* WIND */
 
-                ? `Until ${formatDateTime(endTime)}`
-
-                : "Currently in effect."
+        const windKnots =
+            kmhToKnots(
+                obs.windSpeed?.value
             );
-
-
-
-        /* =================================================
-           WHERE
-        ================================================= */
-
-
-        const where =
-
-            extractSection(
-
-                description,
-
-                "WHERE"
-
-            );
-
 
         document.getElementById(
-            "alertWhere"
+            "wind"
         ).textContent =
-
-            where ||
-
-            alert.areaDesc ||
-
-            "Buzzards Bay · ANZ234";
+            windKnots !== null
+                ? `${windKnots.toFixed(0)} kt`
+                : "--";
 
 
-
-        /* =================================================
-           IMPACTS
-        ================================================= */
-
-
-        const impacts =
-
-            extractSection(
-
-                description,
-
-                "IMPACTS"
-
-            );
-
+        const degrees =
+            obs.windDirection?.value;
 
         document.getElementById(
-            "alertImpacts"
+            "windDirection"
         ).textContent =
+            degrees !== null &&
+            degrees !== undefined
 
-            impacts ||
+                ? degreesToCardinal(
+                    degrees
+                )
 
-            "See National Weather Service alert for impact information.";
-
-
-
-        /* =================================================
-           PRECAUTIONARY / PREPAREDNESS ACTIONS
-        ================================================= */
+                : "--";
 
 
-        const safety =
+        /* GUST */
 
-            cleanText(
-
-                alert.instruction ||
-
-                ""
-
+        const gustKnots =
+            kmhToKnots(
+                obs.windGust?.value
             );
 
-
         document.getElementById(
-            "safetyText"
+            "gust"
         ).textContent =
-
-            safety ||
-
-            "Follow National Weather Service marine safety guidance.";
-
+            gustKnots !== null
+                ? `${gustKnots.toFixed(0)} kt`
+                : "--";
 
     }
 
-
-    catch (
-        error
-    ) {
-
+    catch (error) {
 
         console.error(
-
-            "NWS Marine Alert Error:",
-
+            "Current conditions error:",
             error
-
         );
 
-
-        banner.classList.add(
-            "no-alert"
-        );
-
-
         document.getElementById(
-            "alertTitle"
+            "stationName"
         ).textContent =
-
-            "Marine Alert Data Unavailable";
-
-
-        document.getElementById(
-            "alertIssued"
-        ).textContent =
-
-            "--";
-
-
-        document.getElementById(
-            "alertEnds"
-        ).textContent =
-
-            "--";
-
-
-        document.getElementById(
-            "alertWhat"
-        ).textContent =
-
-            "Unable to retrieve current alert information.";
-
-
-        document.getElementById(
-            "alertWhen"
-        ).textContent =
-
-            "Unavailable";
-
-
-        document.getElementById(
-            "alertWhere"
-        ).textContent =
-
-            "Buzzards Bay · ANZ234";
-
-
-        document.getElementById(
-            "alertImpacts"
-        ).textContent =
-
-            "Unavailable";
-
-
-        document.getElementById(
-            "safetyBox"
-        ).style.display =
-
-            "none";
-
+            "Current Conditions Unavailable";
     }
 
 }
 
+
+/* =========================================================
+   GROUP FORECAST BY DAY
+========================================================= */
+
+function groupDays(periods) {
+
+    const days = {};
+
+    periods.forEach(period => {
+
+        const date =
+            new Date(
+                period.startTime
+            );
+
+        const key =
+            date.toLocaleDateString(
+                "en-CA",
+                {
+                    timeZone:
+                        TIMEZONE
+                }
+            );
+
+        if (!days[key]) {
+
+            days[key] = {
+                date: date,
+                day: null,
+                night: null
+            };
+
+        }
+
+        if (period.isDaytime) {
+            days[key].day =
+                period;
+        }
+
+        else {
+            days[key].night =
+                period;
+        }
+
+    });
+
+
+    return Object
+        .values(days)
+        .slice(0, 3);
+}
+
+
+/* =========================================================
+   CREATE DAY
+========================================================= */
+
+function createDayCard(day) {
+
+    const daytime =
+        day.day;
+
+    const nighttime =
+        day.night;
+
+    const primary =
+        daytime ||
+        nighttime;
+
+
+    const dayName =
+        day.date.toLocaleDateString(
+            "en-US",
+            {
+                timeZone:
+                    TIMEZONE,
+                weekday:
+                    "short"
+            }
+        );
+
+
+    const date =
+        day.date.toLocaleDateString(
+            "en-US",
+            {
+                timeZone:
+                    TIMEZONE,
+                month:
+                    "numeric",
+                day:
+                    "numeric"
+            }
+        );
+
+
+    const high =
+        daytime
+            ? `${daytime.temperature}°`
+            : "--";
+
+
+    const low =
+        nighttime
+            ? `${nighttime.temperature}°`
+            : "--";
+
+
+    const forecast =
+        primary?.shortForecast ||
+        "--";
+
+
+    const precip =
+        primary
+            ?.probabilityOfPrecipitation
+            ?.value;
+
+
+    const precipText =
+        precip !== null &&
+        precip !== undefined
+
+            ? `${precip}%`
+
+            : "--";
+
+
+    const wind =
+        primary
+
+            ? `${primary.windDirection} ${primary.windSpeed}`
+
+            : "--";
+
+
+    return `
+
+        <div class="day">
+
+            <div class="day-name">
+                ${dayName}
+            </div>
+
+            <div class="day-date">
+                ${date}
+            </div>
+
+            <div class="temp-row">
+
+                <div class="high">
+                    ${high}
+                </div>
+
+                <div class="low">
+                    Low ${low}
+                </div>
+
+            </div>
+
+            <div class="description">
+                ${forecast}
+            </div>
+
+            <div class="details">
+
+                <div class="detail">
+
+                    <span class="detail-label">
+                        Rain
+                    </span>
+
+                    <span class="detail-value">
+                        ${precipText}
+                    </span>
+
+                </div>
+
+                <div class="detail">
+
+                    <span class="detail-label">
+                        Wind
+                    </span>
+
+                    <span class="detail-value">
+                        ${wind}
+                    </span>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    `;
+}
+
+
+/* =========================================================
+   FORECAST
+========================================================= */
+
+async function loadForecast(
+    pointData
+) {
+
+    try {
+
+        const forecastURL =
+            pointData.properties
+                .forecast;
+
+        const forecastData =
+            await fetchNWS(
+                forecastURL
+            );
+
+        const periods =
+            forecastData.properties
+                .periods;
+
+        const days =
+            groupDays(
+                periods
+            );
+
+
+        document.getElementById(
+            "forecastGrid"
+        ).innerHTML =
+            days
+                .map(createDayCard)
+                .join("");
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "Forecast error:",
+            error
+        );
+
+        document.getElementById(
+            "forecastGrid"
+        ).innerHTML =
+            `<div class="day">
+                Forecast unavailable
+             </div>`;
+    }
+
+}
 
 
 /* =========================================================
    UPDATED TIME
 ========================================================= */
 
-
-function setUpdatedTime() {
-
+function setUpdated() {
 
     const time =
-
         new Date()
-
-        .toLocaleTimeString(
-
-            "en-US",
-
-            {
-
-                timeZone:
-                    TIMEZONE,
-
-                hour:
-                    "numeric",
-
-                minute:
-                    "2-digit",
-
-                hour12:
-                    true
-
-            }
-
-        );
-
+            .toLocaleTimeString(
+                "en-US",
+                {
+                    timeZone:
+                        TIMEZONE,
+                    hour:
+                        "numeric",
+                    minute:
+                        "2-digit",
+                    hour12:
+                        true
+                }
+            );
 
     document.getElementById(
         "updated"
     ).textContent =
-
         `Updated ${time}`;
-
 }
-
 
 
 /* =========================================================
-   LOAD
+   LOAD EVERYTHING
 ========================================================= */
 
+async function loadWeather() {
 
-async function loadMarineWeather() {
+    try {
 
+        const pointData =
+            await fetchNWS(
+                POINT_URL
+            );
 
-    await loadAlert();
+        await Promise.all([
+            loadCurrent(pointData),
+            loadForecast(pointData)
+        ]);
 
+        setUpdated();
 
-    setUpdatedTime();
+    }
+
+    catch (error) {
+
+        console.error(
+            "Weather error:",
+            error
+        );
+
+    }
 
 }
-
 
 
 /* INITIAL LOAD */
 
-loadMarineWeather();
+loadWeather();
 
 
-
-/* =========================================================
-   REFRESH ACTIVE ALERT EVERY 5 MINUTES
-========================================================= */
-
+/* REFRESH EVERY 10 MINUTES */
 
 setInterval(
-
-    loadMarineWeather,
-
-    5 * 60 * 1000
-
+    loadWeather,
+    10 * 60 * 1000
 );
-
 
 </script>
 
-
 </body>
-
 </html>
