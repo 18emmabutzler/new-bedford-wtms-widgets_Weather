@@ -1,0 +1,1157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: transparent;
+    font-family: Arial, Helvetica, sans-serif;
+    color: #111;
+  }
+
+  .tide-card {
+    box-sizing: border-box;
+    width: 100%;
+    background: #ffffff;
+    border: 1px solid #d9d9d9;
+    border-radius: 9px;
+    padding: 14px 16px 10px 16px;
+  }
+
+  /* HEADER */
+
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 12px;
+  }
+
+  .title {
+    font-size: 18px;
+    font-weight: 700;
+  }
+
+  .subtitle {
+    font-size: 11px;
+    color: #777;
+    margin-top: 4px;
+  }
+
+  .noaa-badge {
+    border: 1px solid #bbb;
+    border-radius: 4px;
+    padding: 4px 7px;
+    font-size: 10px;
+    font-weight: 700;
+  }
+
+  /* OBSERVED WATER LEVEL */
+
+  .observed {
+    background: #f4f4f4;
+    border-radius: 8px;
+    padding: 10px 12px;
+    margin-bottom: 11px;
+  }
+
+  .observed-label {
+    font-size: 10px;
+    color: #666;
+    letter-spacing: 0.4px;
+  }
+
+  .observed-value {
+    font-size: 27px;
+    font-weight: 700;
+    margin-top: 2px;
+  }
+
+  .observed-time {
+    font-size: 10px;
+    color: #777;
+    margin-top: 2px;
+  }
+
+  /* HIGH / LOW */
+
+  .tide-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+
+  .tide-box {
+    flex: 1;
+    border: 1px solid #ddd;
+    border-radius: 7px;
+    padding: 9px 12px;
+  }
+
+  .tide-label {
+    font-size: 11px;
+    font-weight: 700;
+  }
+
+  .tide-value {
+    font-size: 22px;
+    font-weight: 700;
+    margin-top: 4px;
+  }
+
+  .tide-time {
+    font-size: 11px;
+    margin-top: 2px;
+  }
+
+  /* CHART */
+
+  .chart-section {
+    border-top: 1px solid #ddd;
+    padding-top: 9px;
+  }
+
+  .chart-title {
+    font-size: 12px;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+
+  #chart {
+    width: 100%;
+    height: 145px;
+    display: block;
+  }
+
+  /* FOOTER */
+
+  .footer {
+    border-top: 1px solid #ddd;
+    margin-top: 5px;
+    padding-top: 7px;
+
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 4px;
+
+    font-size: 9px;
+    color: #666;
+  }
+
+  .updated {
+    width: 100%;
+    margin-top: 2px;
+  }
+</style>
+</head>
+
+<body>
+
+<div class="tide-card">
+
+  <!-- HEADER -->
+
+  <div class="header">
+
+    <div>
+      <div class="title">New Bedford Harbor</div>
+      <div class="subtitle">
+        NOAA Station 8447636 · Massachusetts
+      </div>
+    </div>
+
+    <div class="noaa-badge">
+      NOAA CO-OPS
+    </div>
+
+  </div>
+
+
+  <!-- OBSERVED WATER LEVEL -->
+
+  <div class="observed">
+
+    <div class="observed-label">
+      OBSERVED WATER LEVEL
+    </div>
+
+    <div id="observedValue" class="observed-value">
+      -- ft
+    </div>
+
+    <div id="observedTime" class="observed-time">
+      Loading NOAA observation...
+    </div>
+
+  </div>
+
+
+  <!-- HIGH / LOW -->
+
+  <div class="tide-row">
+
+    <div class="tide-box">
+
+      <div class="tide-label">
+        ▲ Next High Tide
+      </div>
+
+      <div id="highValue" class="tide-value">
+        -- ft
+      </div>
+
+      <div id="highTime" class="tide-time">
+        Loading...
+      </div>
+
+    </div>
+
+
+    <div class="tide-box">
+
+      <div class="tide-label">
+        ▼ Next Low Tide
+      </div>
+
+      <div id="lowValue" class="tide-value">
+        -- ft
+      </div>
+
+      <div id="lowTime" class="tide-time">
+        Loading...
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- TIDE CURVE -->
+
+  <div class="chart-section">
+
+    <div class="chart-title">
+      Tidal Chart · Next 24 Hours
+    </div>
+
+    <svg id="chart"></svg>
+
+  </div>
+
+
+  <!-- FOOTER -->
+
+  <div class="footer">
+
+    <span>Datum: MLLW</span>
+
+    <span>Units: feet</span>
+
+    <span>Local Time: EDT/EST</span>
+
+    <span id="updated" class="updated">
+      Updating from NOAA...
+    </span>
+
+  </div>
+
+</div>
+
+
+<script>
+
+const STATION = "8447636";
+const DATUM = "MLLW";
+
+const API =
+  "https://api.tidesandcurrents.noaa.gov/api/prod/datagetter";
+
+const TIMEZONE =
+  "America/New_York";
+
+
+/* ======================================================
+   DATE HELPERS
+====================================================== */
+
+function getDateParts(date = new Date()) {
+
+  const parts =
+    new Intl.DateTimeFormat("en-US", {
+      timeZone: TIMEZONE,
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false
+    }).formatToParts(date);
+
+  const result = {};
+
+  parts.forEach(p => {
+    result[p.type] = p.value;
+  });
+
+  return result;
+}
+
+
+function getNOAADate() {
+
+  const p = getDateParts();
+
+  return `${p.year}${p.month}${p.day}`;
+}
+
+
+function getNowKey() {
+
+  const p = getDateParts();
+
+  return `${p.year}-${p.month}-${p.day} ${p.hour}:${p.minute}`;
+}
+
+
+function parseNOAADate(value) {
+
+  const [datePart, timePart] =
+    value.split(" ");
+
+  const [year, month, day] =
+    datePart.split("-").map(Number);
+
+  const [hour, minute] =
+    timePart.split(":").map(Number);
+
+  return new Date(
+    year,
+    month - 1,
+    day,
+    hour,
+    minute
+  );
+}
+
+
+/* ======================================================
+   TIME FORMATTING
+====================================================== */
+
+function formatClock(dateTime) {
+
+  const time =
+    dateTime.split(" ")[1].split(":");
+
+  let hour =
+    parseInt(time[0], 10);
+
+  const minute =
+    time[1];
+
+  const suffix =
+    hour >= 12 ? "PM" : "AM";
+
+  hour = hour % 12;
+
+  if (hour === 0) {
+    hour = 12;
+  }
+
+  return `${hour}:${minute} ${suffix}`;
+}
+
+
+function formatTideTime(dateTime) {
+
+  const tideDate =
+    dateTime.substring(0, 10);
+
+  const p =
+    getDateParts();
+
+  const today =
+    `${p.year}-${p.month}-${p.day}`;
+
+
+  const tomorrowDate =
+    new Date();
+
+  tomorrowDate.setDate(
+    tomorrowDate.getDate() + 1
+  );
+
+
+  const tp =
+    getDateParts(tomorrowDate);
+
+  const tomorrow =
+    `${tp.year}-${tp.month}-${tp.day}`;
+
+
+  if (tideDate === today) {
+
+    return `Today · ${formatClock(dateTime)}`;
+
+  }
+
+
+  if (tideDate === tomorrow) {
+
+    return `Tomorrow · ${formatClock(dateTime)}`;
+
+  }
+
+
+  return formatClock(dateTime);
+}
+
+
+/* ======================================================
+   SVG HELPER
+====================================================== */
+
+function createSVG(type, attributes = {}) {
+
+  const element =
+    document.createElementNS(
+      "http://www.w3.org/2000/svg",
+      type
+    );
+
+
+  Object.entries(attributes)
+    .forEach(([key, value]) => {
+
+      element.setAttribute(
+        key,
+        value
+      );
+
+    });
+
+
+  return element;
+}
+
+
+/* ======================================================
+   DRAW TIDE CHART
+====================================================== */
+
+function drawChart(predictions, hiLo) {
+
+  const svg =
+    document.getElementById("chart");
+
+  svg.innerHTML = "";
+
+
+  const width =
+    svg.clientWidth || 480;
+
+  const height =
+    svg.clientHeight || 145;
+
+
+  svg.setAttribute(
+    "viewBox",
+    `0 0 ${width} ${height}`
+  );
+
+
+  const margin = {
+    top: 17,
+    right: 10,
+    bottom: 25,
+    left: 32
+  };
+
+
+  const graphWidth =
+    width -
+    margin.left -
+    margin.right;
+
+
+  const graphHeight =
+    height -
+    margin.top -
+    margin.bottom;
+
+
+  const now =
+    new Date();
+
+
+  const start =
+    new Date(
+      now.getTime() -
+      6 * 60 * 60 * 1000
+    );
+
+
+  const end =
+    new Date(
+      now.getTime() +
+      18 * 60 * 60 * 1000
+    );
+
+
+  const points =
+    predictions
+      .map(p => ({
+        time: parseNOAADate(p.t),
+        value: Number(p.v)
+      }))
+      .filter(p =>
+        p.time >= start &&
+        p.time <= end
+      );
+
+
+  if (points.length < 2) {
+    return;
+  }
+
+
+  const values =
+    points.map(p => p.value);
+
+
+  const minY =
+    Math.floor(
+      Math.min(...values) - 0.5
+    );
+
+
+  const maxY =
+    Math.ceil(
+      Math.max(...values) + 0.5
+    );
+
+
+  function xScale(date) {
+
+    return margin.left +
+      ((date - start) / (end - start))
+      * graphWidth;
+  }
+
+
+  function yScale(value) {
+
+    return margin.top +
+      ((maxY - value) / (maxY - minY))
+      * graphHeight;
+  }
+
+
+  /* ----------------------------------
+     HORIZONTAL GRID
+  ---------------------------------- */
+
+  for (
+    let value = minY;
+    value <= maxY;
+    value++
+  ) {
+
+    const y =
+      yScale(value);
+
+
+    svg.appendChild(
+      createSVG("line", {
+        x1: margin.left,
+        y1: y,
+        x2: width - margin.right,
+        y2: y,
+        stroke: "#e1e6eb",
+        "stroke-width": "1"
+      })
+    );
+
+
+    const label =
+      createSVG("text", {
+        x: margin.left - 5,
+        y: y + 3,
+        "text-anchor": "end",
+        fill: "#777",
+        "font-size": "8"
+      });
+
+
+    label.textContent =
+      value;
+
+
+    svg.appendChild(label);
+
+  }
+
+
+  /* ----------------------------------
+     TIME AXIS
+  ---------------------------------- */
+
+  for (
+    let hours = 0;
+    hours <= 24;
+    hours += 6
+  ) {
+
+    const time =
+      new Date(
+        start.getTime() +
+        hours *
+        60 *
+        60 *
+        1000
+      );
+
+
+    const x =
+      xScale(time);
+
+
+    svg.appendChild(
+      createSVG("line", {
+        x1: x,
+        y1: margin.top,
+        x2: x,
+        y2: height - margin.bottom,
+        stroke: "#edf0f2",
+        "stroke-width": "1"
+      })
+    );
+
+
+    const label =
+      createSVG("text", {
+        x: x,
+        y: height - 7,
+        "text-anchor":
+          hours === 0
+            ? "start"
+            : hours === 24
+            ? "end"
+            : "middle",
+        fill: "#777",
+        "font-size": "8"
+      });
+
+
+    label.textContent =
+      time.toLocaleTimeString(
+        "en-US",
+        {
+          hour: "numeric",
+          hour12: true
+        }
+      );
+
+
+    svg.appendChild(label);
+
+  }
+
+
+  /* ----------------------------------
+     AREA UNDER CURVE
+  ---------------------------------- */
+
+  let linePath = "";
+
+  points.forEach((point, index) => {
+
+    const x =
+      xScale(point.time);
+
+    const y =
+      yScale(point.value);
+
+
+    if (index === 0) {
+
+      linePath =
+        `M ${x} ${y}`;
+
+    }
+
+    else {
+
+      linePath +=
+        ` L ${x} ${y}`;
+
+    }
+
+  });
+
+
+  const first =
+    points[0];
+
+  const last =
+    points[points.length - 1];
+
+
+  const areaPath =
+    linePath +
+    ` L ${xScale(last.time)} ${height - margin.bottom}` +
+    ` L ${xScale(first.time)} ${height - margin.bottom}` +
+    " Z";
+
+
+  svg.appendChild(
+    createSVG("path", {
+      d: areaPath,
+      fill: "#e7f2fb"
+    })
+  );
+
+
+  /* ----------------------------------
+     BLUE TIDE CURVE
+  ---------------------------------- */
+
+  svg.appendChild(
+    createSVG("path", {
+      d: linePath,
+      fill: "none",
+      stroke: "#0874c9",
+      "stroke-width": "2.5",
+      "stroke-linejoin": "round",
+      "stroke-linecap": "round"
+    })
+  );
+
+
+  /* ----------------------------------
+     HIGH / LOW MARKERS
+  ---------------------------------- */
+
+  hiLo.forEach(tide => {
+
+    const time =
+      parseNOAADate(tide.t);
+
+
+    if (
+      time < start ||
+      time > end
+    ) {
+      return;
+    }
+
+
+    const circle =
+      createSVG("circle", {
+
+        cx:
+          xScale(time),
+
+        cy:
+          yScale(
+            Number(tide.v)
+          ),
+
+        r: "4",
+
+        fill:
+          tide.type === "H"
+            ? "#16a34a"
+            : "#dc2626",
+
+        stroke: "#111",
+
+        "stroke-width": "1"
+
+      });
+
+
+    svg.appendChild(circle);
+
+  });
+
+
+  /* ----------------------------------
+     CURRENT TIME VERTICAL LINE
+  ---------------------------------- */
+
+  const nowX =
+    xScale(now);
+
+
+  svg.appendChild(
+    createSVG("line", {
+
+      x1: nowX,
+
+      y1: margin.top,
+
+      x2: nowX,
+
+      y2:
+        height -
+        margin.bottom,
+
+      stroke: "#111827",
+
+      "stroke-width": "1.5",
+
+      "stroke-dasharray":
+        "5 4"
+
+    })
+  );
+
+
+  /* NOW LABEL */
+
+  const labelWidth = 32;
+
+
+  svg.appendChild(
+    createSVG("rect", {
+
+      x:
+        nowX -
+        labelWidth / 2,
+
+      y: 1,
+
+      width:
+        labelWidth,
+
+      height: 14,
+
+      rx: 3,
+
+      fill:
+        "#111827"
+
+    })
+  );
+
+
+  const nowLabel =
+    createSVG("text", {
+
+      x: nowX,
+
+      y: 11,
+
+      "text-anchor":
+        "middle",
+
+      fill:
+        "#ffffff",
+
+      "font-size":
+        "8",
+
+      "font-weight":
+        "700"
+
+    });
+
+
+  nowLabel.textContent =
+    "NOW";
+
+
+  svg.appendChild(
+    nowLabel
+  );
+
+}
+
+
+/* ======================================================
+   LOAD NOAA DATA
+====================================================== */
+
+async function loadTides() {
+
+  const today =
+    getNOAADate();
+
+  const nowKey =
+    getNowKey();
+
+
+  /* HIGH / LOW */
+
+  const hiloURL =
+    `${API}` +
+    `?begin_date=${today}` +
+    `&range=48` +
+    `&station=${STATION}` +
+    `&product=predictions` +
+    `&datum=${DATUM}` +
+    `&time_zone=lst_ldt` +
+    `&interval=hilo` +
+    `&units=english` +
+    `&application=ExperienceBuilder_Tides` +
+    `&format=json`;
+
+
+  /* 6-MINUTE PREDICTIONS */
+
+  const curveURL =
+    `${API}` +
+    `?begin_date=${today}` +
+    `&range=48` +
+    `&station=${STATION}` +
+    `&product=predictions` +
+    `&datum=${DATUM}` +
+    `&time_zone=lst_ldt` +
+    `&interval=6` +
+    `&units=english` +
+    `&application=ExperienceBuilder_Tides` +
+    `&format=json`;
+
+
+  /* OBSERVED WATER LEVEL */
+
+  const observedURL =
+    `${API}` +
+    `?date=latest` +
+    `&station=${STATION}` +
+    `&product=water_level` +
+    `&datum=${DATUM}` +
+    `&time_zone=lst_ldt` +
+    `&units=english` +
+    `&application=ExperienceBuilder_Tides` +
+    `&format=json`;
+
+
+  try {
+
+    const [
+      hiloResponse,
+      curveResponse,
+      observedResponse
+    ] =
+      await Promise.all([
+        fetch(hiloURL),
+        fetch(curveURL),
+        fetch(observedURL)
+      ]);
+
+
+    const hiloData =
+      await hiloResponse.json();
+
+
+    const curveData =
+      await curveResponse.json();
+
+
+    const observedData =
+      await observedResponse.json();
+
+
+    const hilo =
+      hiloData.predictions || [];
+
+
+    const predictions =
+      curveData.predictions || [];
+
+
+    /* ----------------------------------
+       NEXT HIGH / LOW
+    ---------------------------------- */
+
+    const future =
+      hilo.filter(
+        tide =>
+          tide.t >= nowKey
+      );
+
+
+    const nextHigh =
+      future.find(
+        tide =>
+          tide.type === "H"
+      );
+
+
+    const nextLow =
+      future.find(
+        tide =>
+          tide.type === "L"
+      );
+
+
+    if (nextHigh) {
+
+      document.getElementById(
+        "highValue"
+      ).textContent =
+        `${Number(
+          nextHigh.v
+        ).toFixed(2)} ft`;
+
+
+      document.getElementById(
+        "highTime"
+      ).textContent =
+        formatTideTime(
+          nextHigh.t
+        );
+
+    }
+
+
+    if (nextLow) {
+
+      document.getElementById(
+        "lowValue"
+      ).textContent =
+        `${Number(
+          nextLow.v
+        ).toFixed(2)} ft`;
+
+
+      document.getElementById(
+        "lowTime"
+      ).textContent =
+        formatTideTime(
+          nextLow.t
+        );
+
+    }
+
+
+    /* ----------------------------------
+       OBSERVED WATER LEVEL
+    ---------------------------------- */
+
+    if (
+      observedData.data &&
+      observedData.data.length
+    ) {
+
+      const observation =
+        observedData.data[
+          observedData.data.length - 1
+        ];
+
+
+      document.getElementById(
+        "observedValue"
+      ).textContent =
+        `${Number(
+          observation.v
+        ).toFixed(2)} ft`;
+
+
+      document.getElementById(
+        "observedTime"
+      ).textContent =
+        `Observed ${formatClock(
+          observation.t
+        )} · Preliminary NOAA data`;
+
+    }
+
+
+    /* ----------------------------------
+       DRAW CHART
+    ---------------------------------- */
+
+    drawChart(
+      predictions,
+      hilo
+    );
+
+
+    /* ----------------------------------
+       UPDATED TIME
+    ---------------------------------- */
+
+    const current =
+      new Date().toLocaleTimeString(
+        "en-US",
+        {
+          timeZone: TIMEZONE,
+          hour: "numeric",
+          minute: "2-digit",
+          hour12: true
+        }
+      );
+
+
+    document.getElementById(
+      "updated"
+    ).textContent =
+      `Updated from NOAA at ${current}`;
+
+  }
+
+
+  catch (error) {
+
+    console.error(
+      "NOAA Tide Error:",
+      error
+    );
+
+
+    document.getElementById(
+      "updated"
+    ).textContent =
+      "NOAA data unavailable";
+
+  }
+
+}
+
+
+/* LOAD */
+
+loadTides();
+
+
+/* REFRESH EVERY 6 MINUTES */
+
+setInterval(
+  loadTides,
+  6 * 60 * 1000
+);
+
+
+/* REDRAW WHEN EXPERIENCE BUILDER RESIZES */
+
+let resizeTimer;
+
+window.addEventListener(
+  "resize",
+  function() {
+
+    clearTimeout(
+      resizeTimer
+    );
+
+    resizeTimer =
+      setTimeout(
+        loadTides,
+        250
+      );
+
+  }
+);
+
+</script>
+
+</body>
+</html>
