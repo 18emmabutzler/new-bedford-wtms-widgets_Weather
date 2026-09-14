@@ -1,0 +1,2274 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+>
+
+<title>New Bedford Weather</title>
+
+
+<style>
+
+/* =========================================================
+   BASE
+========================================================= */
+
+* {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    margin: 0;
+    padding: 0;
+
+    background: transparent;
+
+    font-family:
+        Arial,
+        Helvetica,
+        sans-serif;
+
+    color: #17233b;
+}
+
+.wrapper {
+    width: 100%;
+}
+
+
+/* =========================================================
+   MAIN CARD
+========================================================= */
+
+.weather-card {
+
+    width: 100%;
+
+    background: #ffffff;
+
+    border:
+        1px solid #d9d9d9;
+
+    border-radius: 9px;
+
+    overflow: hidden;
+}
+
+
+/* =========================================================
+   HEADER
+========================================================= */
+
+.weather-header {
+
+    padding:
+        14px 16px 12px 16px;
+
+    border-bottom:
+        1px solid #e5e5e5;
+}
+
+
+.header-row {
+
+    display: flex;
+
+    justify-content:
+        space-between;
+
+    align-items:
+        flex-start;
+
+    gap: 10px;
+}
+
+
+.weather-title {
+
+    color: #17233b;
+
+    font-size: 18px;
+
+    font-weight: 700;
+}
+
+
+.weather-subtitle {
+
+    margin-top: 3px;
+
+    color: #777777;
+
+    font-size: 10px;
+}
+
+
+.nws-badge {
+
+    padding:
+        4px 7px;
+
+    border:
+        1px solid #aaaaaa;
+
+    border-radius: 4px;
+
+    color: #17233b;
+
+    font-size: 9px;
+
+    font-weight: 700;
+}
+
+
+/* =========================================================
+   CURRENT CONDITIONS
+========================================================= */
+
+.current-section {
+
+    padding:
+        14px 16px;
+}
+
+
+.section-label {
+
+    margin-bottom: 8px;
+
+    color: #777777;
+
+    font-size: 9px;
+
+    font-weight: 700;
+
+    letter-spacing: 0.5px;
+
+    text-transform: uppercase;
+}
+
+
+.current-grid {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(4, 1fr);
+
+    border:
+        1px solid #dddddd;
+
+    border-radius: 7px;
+
+    overflow: hidden;
+}
+
+
+.current-item {
+
+    min-width: 0;
+
+    padding:
+        12px 9px;
+
+    text-align: center;
+
+    border-right:
+        1px solid #e5e5e5;
+}
+
+
+.current-item:last-child {
+
+    border-right: none;
+}
+
+
+.current-label {
+
+    color: #777777;
+
+    font-size: 9px;
+
+    text-transform: uppercase;
+
+    letter-spacing: 0.3px;
+}
+
+
+.current-value {
+
+    margin-top: 5px;
+
+    color: #0b1f3a;
+
+    font-size: 16px;
+
+    font-weight: 700;
+
+    line-height: 1.3;
+}
+
+
+.current-secondary {
+
+    margin-top: 3px;
+
+    color: #777777;
+
+    font-size: 9px;
+}
+
+
+/* =========================================================
+   CONDITIONS STRIP
+========================================================= */
+
+.conditions-strip {
+
+    margin-top: 9px;
+
+    padding:
+        9px 11px;
+
+    display: flex;
+
+    justify-content:
+        space-between;
+
+    align-items:
+        center;
+
+    gap: 10px;
+
+    background:
+        #f5f6f7;
+
+    border-radius: 6px;
+}
+
+
+.conditions-text {
+
+    color: #17233b;
+
+    font-size: 11px;
+
+    font-weight: 600;
+}
+
+
+.observation-time {
+
+    color: #777777;
+
+    font-size: 9px;
+
+    text-align: right;
+}
+
+
+/* =========================================================
+   FORECAST SECTION
+========================================================= */
+
+.forecast-section {
+
+    padding:
+        0 16px 14px 16px;
+}
+
+
+.forecast-heading {
+
+    display: flex;
+
+    justify-content:
+        space-between;
+
+    align-items: center;
+
+    margin-bottom: 8px;
+}
+
+
+.forecast-title {
+
+    color: #17233b;
+
+    font-size: 15px;
+
+    font-weight: 700;
+}
+
+
+.forecast-source {
+
+    color: #777777;
+
+    font-size: 9px;
+}
+
+
+/* =========================================================
+   FORECAST CARDS
+========================================================= */
+
+.forecast-grid {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(3, 1fr);
+
+    gap: 8px;
+}
+
+
+.day-card {
+
+    min-width: 0;
+
+    padding:
+        11px;
+
+    background:
+        #f7f8f9;
+
+    border:
+        1px solid #dddddd;
+
+    border-radius: 7px;
+}
+
+
+.day-name {
+
+    color: #17233b;
+
+    font-size: 13px;
+
+    font-weight: 700;
+}
+
+
+.day-date {
+
+    margin-top: 2px;
+
+    color: #888888;
+
+    font-size: 9px;
+}
+
+
+/* HIGH / LOW */
+
+.temp-row {
+
+    display: flex;
+
+    align-items:
+        baseline;
+
+    gap: 8px;
+
+    margin-top: 9px;
+}
+
+
+.high-temp {
+
+    color: #17233b;
+
+    font-size: 22px;
+
+    font-weight: 700;
+}
+
+
+.low-temp {
+
+    color: #777777;
+
+    font-size: 13px;
+
+    font-weight: 600;
+}
+
+
+/* SHORT FORECAST */
+
+.short-forecast {
+
+    min-height: 30px;
+
+    margin-top: 6px;
+
+    color: #444444;
+
+    font-size: 11px;
+
+    font-weight: 600;
+
+    line-height: 1.35;
+}
+
+
+/* FORECAST DETAILS */
+
+.day-details {
+
+    margin-top: 9px;
+
+    padding-top: 8px;
+
+    border-top:
+        1px solid #dddddd;
+}
+
+
+.detail-row {
+
+    display: flex;
+
+    justify-content:
+        space-between;
+
+    gap: 8px;
+
+    margin-bottom: 5px;
+
+    font-size: 9px;
+}
+
+
+.detail-row:last-child {
+
+    margin-bottom: 0;
+}
+
+
+.detail-label {
+
+    color: #777777;
+}
+
+
+.detail-value {
+
+    color: #17233b;
+
+    font-weight: 600;
+
+    text-align: right;
+}
+
+
+/* =========================================================
+   LINK
+========================================================= */
+
+.weather-link {
+
+    display: block;
+
+    margin:
+        0 16px 12px 16px;
+
+    padding:
+        9px 10px;
+
+    background:
+        #074b78;
+
+    border-radius: 6px;
+
+    color:
+        #ffffff;
+
+    text-align: center;
+
+    text-decoration: none;
+
+    font-size: 10px;
+
+    font-weight: 700;
+}
+
+
+.weather-link:hover {
+
+    background:
+        #063a5d;
+}
+
+
+/* =========================================================
+   FOOTER
+========================================================= */
+
+.footer {
+
+    display: flex;
+
+    justify-content:
+        space-between;
+
+    flex-wrap: wrap;
+
+    gap: 5px;
+
+    padding:
+        0 16px 12px 16px;
+
+    color:
+        #777777;
+
+    font-size: 9px;
+}
+
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media
+(max-width: 650px) {
+
+    .current-grid {
+
+        grid-template-columns:
+            1fr 1fr;
+    }
+
+
+    .current-item {
+
+        border-bottom:
+            1px solid #e5e5e5;
+    }
+
+
+    .current-item:nth-child(2n) {
+
+        border-right:
+            none;
+    }
+
+
+    .current-item:nth-last-child(-n+2) {
+
+        border-bottom:
+            none;
+    }
+
+
+    .forecast-grid {
+
+        grid-template-columns:
+            1fr;
+    }
+
+}
+
+</style>
+
+</head>
+
+
+<body>
+
+
+<div class="wrapper">
+
+
+<div class="weather-card">
+
+
+<!-- =========================================================
+     HEADER
+========================================================= -->
+
+
+<div class="weather-header">
+
+
+    <div class="header-row">
+
+
+        <div>
+
+
+            <div class="weather-title">
+
+                Current Weather Conditions
+
+            </div>
+
+
+            <div
+                id="stationName"
+                class="weather-subtitle"
+            >
+
+                New Bedford Harbor · Loading observation station...
+
+            </div>
+
+
+        </div>
+
+
+        <div class="nws-badge">
+
+            NWS
+
+        </div>
+
+
+    </div>
+
+
+</div>
+
+
+
+<!-- =========================================================
+     CURRENT CONDITIONS
+========================================================= -->
+
+
+<div class="current-section">
+
+
+    <div class="section-label">
+
+        Current Conditions
+
+    </div>
+
+
+    <div class="current-grid">
+
+
+        <!-- TEMPERATURE -->
+
+        <div class="current-item">
+
+
+            <div class="current-label">
+
+                Temperature
+
+            </div>
+
+
+            <div
+                id="currentTemp"
+                class="current-value"
+            >
+
+                --
+
+            </div>
+
+
+            <div class="current-secondary">
+
+                Air Temperature
+
+            </div>
+
+
+        </div>
+
+
+
+        <!-- PRESSURE -->
+
+        <div class="current-item">
+
+
+            <div class="current-label">
+
+                Barometric Pressure
+
+            </div>
+
+
+            <div
+                id="currentPressure"
+                class="current-value"
+            >
+
+                --
+
+            </div>
+
+
+            <div class="current-secondary">
+
+                Millibars
+
+            </div>
+
+
+        </div>
+
+
+
+        <!-- WIND -->
+
+        <div class="current-item">
+
+
+            <div class="current-label">
+
+                Wind
+
+            </div>
+
+
+            <div
+                id="currentWind"
+                class="current-value"
+            >
+
+                --
+
+            </div>
+
+
+            <div
+                id="windDirection"
+                class="current-secondary"
+            >
+
+                --
+
+            </div>
+
+
+        </div>
+
+
+
+        <!-- GUST -->
+
+        <div class="current-item">
+
+
+            <div class="current-label">
+
+                Wind Gust
+
+            </div>
+
+
+            <div
+                id="currentGust"
+                class="current-value"
+            >
+
+                --
+
+            </div>
+
+
+            <div class="current-secondary">
+
+                Current Gust
+
+            </div>
+
+
+        </div>
+
+
+    </div>
+
+
+
+    <!-- CONDITIONS DESCRIPTION -->
+
+    <div class="conditions-strip">
+
+
+        <div
+            id="currentConditions"
+            class="conditions-text"
+        >
+
+            Loading current conditions...
+
+        </div>
+
+
+        <div
+            id="observationTime"
+            class="observation-time"
+        >
+
+            --
+
+        </div>
+
+
+    </div>
+
+
+</div>
+
+
+
+<!-- =========================================================
+     3-DAY FORECAST
+========================================================= -->
+
+
+<div class="forecast-section">
+
+
+    <div class="forecast-heading">
+
+
+        <div class="forecast-title">
+
+            3-Day Weather Forecast
+
+        </div>
+
+
+        <div class="forecast-source">
+
+            New Bedford Harbor
+
+        </div>
+
+
+    </div>
+
+
+    <div
+        id="forecastGrid"
+        class="forecast-grid"
+    >
+
+
+        <!-- DAY 1 -->
+
+        <div class="day-card">
+
+            <div class="day-name">
+                Loading...
+            </div>
+
+        </div>
+
+
+        <!-- DAY 2 -->
+
+        <div class="day-card">
+
+            <div class="day-name">
+                Loading...
+            </div>
+
+        </div>
+
+
+        <!-- DAY 3 -->
+
+        <div class="day-card">
+
+            <div class="day-name">
+                Loading...
+            </div>
+
+        </div>
+
+
+    </div>
+
+
+</div>
+
+
+
+<!-- =========================================================
+     NWS LINK
+========================================================= -->
+
+
+<a
+    class="weather-link"
+    href="https://forecast.weather.gov/MapClick.php?lat=41.628&lon=-70.908"
+    target="_blank"
+    rel="noopener noreferrer"
+>
+
+    View Full National Weather Service Forecast
+
+</a>
+
+
+
+<!-- =========================================================
+     FOOTER
+========================================================= -->
+
+
+<div class="footer">
+
+
+    <span>
+
+        Source: National Weather Service
+
+    </span>
+
+
+    <span id="updated">
+
+        Updating...
+
+    </span>
+
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+
+<script>
+
+
+/* =========================================================
+   SETTINGS
+========================================================= */
+
+
+const LATITUDE =
+    41.628;
+
+
+const LONGITUDE =
+    -70.908;
+
+
+const TIMEZONE =
+    "America/New_York";
+
+
+const POINT_URL =
+    `https://api.weather.gov/points/${LATITUDE},${LONGITUDE}`;
+
+
+
+/* =========================================================
+   UNIT CONVERSIONS
+========================================================= */
+
+
+/*
+   Celsius -> Fahrenheit
+*/
+
+function celsiusToFahrenheit(
+    celsius
+) {
+
+
+    if (
+        celsius === null ||
+        celsius === undefined
+    ) {
+
+        return null;
+
+    }
+
+
+    return (
+        celsius * 9 / 5
+    ) + 32;
+
+}
+
+
+
+/*
+   Pascals -> millibars
+*/
+
+function pascalsToMillibars(
+    pascals
+) {
+
+
+    if (
+        pascals === null ||
+        pascals === undefined
+    ) {
+
+        return null;
+
+    }
+
+
+    return pascals / 100;
+
+}
+
+
+
+/*
+   Kilometers/hour -> knots
+*/
+
+function kmhToKnots(
+    kmh
+) {
+
+
+    if (
+        kmh === null ||
+        kmh === undefined
+    ) {
+
+        return null;
+
+    }
+
+
+    return kmh * 0.539957;
+
+}
+
+
+
+/* =========================================================
+   WIND DIRECTION
+========================================================= */
+
+
+function degreesToCardinal(
+    degrees
+) {
+
+
+    if (
+        degrees === null ||
+        degrees === undefined
+    ) {
+
+        return "--";
+
+    }
+
+
+    const directions = [
+
+        "N",
+        "NNE",
+        "NE",
+        "ENE",
+
+        "E",
+        "ESE",
+        "SE",
+        "SSE",
+
+        "S",
+        "SSW",
+        "SW",
+        "WSW",
+
+        "W",
+        "WNW",
+        "NW",
+        "NNW"
+
+    ];
+
+
+    const index =
+
+        Math.round(
+            degrees / 22.5
+        ) % 16;
+
+
+    return directions[
+        index
+    ];
+
+}
+
+
+
+/* =========================================================
+   FORMAT TIME
+========================================================= */
+
+
+function formatObservationTime(
+    dateString
+) {
+
+
+    if (!dateString) {
+
+        return "--";
+
+    }
+
+
+    const date =
+        new Date(
+            dateString
+        );
+
+
+    return date.toLocaleString(
+
+        "en-US",
+
+        {
+
+            timeZone:
+                TIMEZONE,
+
+            month:
+                "short",
+
+            day:
+                "numeric",
+
+            hour:
+                "numeric",
+
+            minute:
+                "2-digit",
+
+            hour12:
+                true
+
+        }
+
+    );
+
+}
+
+
+
+/* =========================================================
+   FETCH NWS JSON
+========================================================= */
+
+
+async function fetchNWS(
+    url
+) {
+
+
+    const response =
+
+        await fetch(
+
+            url,
+
+            {
+
+                headers: {
+
+                    "Accept":
+                        "application/geo+json"
+
+                }
+
+            }
+
+        );
+
+
+    if (!response.ok) {
+
+        throw new Error(
+
+            `NWS request failed: ${response.status}`
+
+        );
+
+    }
+
+
+    return await response.json();
+
+}
+
+
+
+/* =========================================================
+   GET POINT INFORMATION
+========================================================= */
+
+
+async function getPointInformation() {
+
+
+    return await fetchNWS(
+        POINT_URL
+    );
+
+}
+
+
+
+/* =========================================================
+   CURRENT CONDITIONS
+========================================================= */
+
+
+async function loadCurrentConditions(
+    pointData
+) {
+
+
+    try {
+
+
+        /*
+           NWS /points returns an
+           observationStations URL.
+        */
+
+
+        const stationListURL =
+
+            pointData
+                .properties
+                .observationStations;
+
+
+        if (!stationListURL) {
+
+            throw new Error(
+                "No observation station URL"
+            );
+
+        }
+
+
+
+        /* =================================================
+           GET NEARBY STATIONS
+        ================================================= */
+
+
+        const stationData =
+
+            await fetchNWS(
+                stationListURL
+            );
+
+
+        if (
+            !stationData.features ||
+            !stationData.features.length
+        ) {
+
+            throw new Error(
+                "No observation stations found"
+            );
+
+        }
+
+
+
+        /*
+           Use the first NWS station
+           returned for this grid point.
+        */
+
+
+        const station =
+
+            stationData.features[0];
+
+
+        const stationID =
+
+            station.properties
+                .stationIdentifier;
+
+
+        const stationName =
+
+            station.properties.name ||
+
+            stationID;
+
+
+
+        document.getElementById(
+            "stationName"
+        ).textContent =
+
+            `New Bedford Harbor · ${stationName}`;
+
+
+
+        /* =================================================
+           LATEST OBSERVATION
+        ================================================= */
+
+
+        const observationURL =
+
+            `https://api.weather.gov/stations/${stationID}/observations/latest`;
+
+
+        const observationData =
+
+            await fetchNWS(
+                observationURL
+            );
+
+
+        const obs =
+
+            observationData.properties;
+
+
+
+        /* =================================================
+           TEMPERATURE
+        ================================================= */
+
+
+        const tempC =
+
+            obs.temperature
+                ?.value;
+
+
+        const tempF =
+
+            celsiusToFahrenheit(
+                tempC
+            );
+
+
+        document.getElementById(
+            "currentTemp"
+        ).textContent =
+
+            tempF !== null
+
+                ? `${tempF.toFixed(1)}°F`
+
+                : "--";
+
+
+
+        /* =================================================
+           BAROMETRIC PRESSURE
+        ================================================= */
+
+
+        const pressurePa =
+
+            obs.barometricPressure
+                ?.value;
+
+
+        const pressureMb =
+
+            pascalsToMillibars(
+                pressurePa
+            );
+
+
+        document.getElementById(
+            "currentPressure"
+        ).textContent =
+
+            pressureMb !== null
+
+                ? `${pressureMb.toFixed(1)} mb`
+
+                : "--";
+
+
+
+        /* =================================================
+           WIND SPEED
+        ================================================= */
+
+
+        const windKmh =
+
+            obs.windSpeed
+                ?.value;
+
+
+        const windKnots =
+
+            kmhToKnots(
+                windKmh
+            );
+
+
+
+        /* =================================================
+           WIND DIRECTION
+        ================================================= */
+
+
+        const windDegrees =
+
+            obs.windDirection
+                ?.value;
+
+
+        const windCardinal =
+
+            degreesToCardinal(
+                windDegrees
+            );
+
+
+        document.getElementById(
+            "currentWind"
+        ).textContent =
+
+            windKnots !== null
+
+                ? `${windKnots.toFixed(1)} kt`
+
+                : "--";
+
+
+        document.getElementById(
+            "windDirection"
+        ).textContent =
+
+            windCardinal !== "--"
+
+                ? `${windCardinal} · ${Math.round(windDegrees)}°`
+
+                : "--";
+
+
+
+        /* =================================================
+           WIND GUST
+        ================================================= */
+
+
+        const gustKmh =
+
+            obs.windGust
+                ?.value;
+
+
+        const gustKnots =
+
+            kmhToKnots(
+                gustKmh
+            );
+
+
+        document.getElementById(
+            "currentGust"
+        ).textContent =
+
+            gustKnots !== null
+
+                ? `${gustKnots.toFixed(1)} kt`
+
+                : "None";
+
+
+
+        /* =================================================
+           CURRENT DESCRIPTION
+        ================================================= */
+
+
+        document.getElementById(
+            "currentConditions"
+        ).textContent =
+
+            obs.textDescription ||
+
+            "Current weather observation";
+
+
+
+        /* =================================================
+           OBSERVATION TIME
+        ================================================= */
+
+
+        document.getElementById(
+            "observationTime"
+        ).textContent =
+
+            obs.timestamp
+
+                ? `Observed ${formatObservationTime(obs.timestamp)}`
+
+                : "Observation time unavailable";
+
+
+    }
+
+
+    catch (
+        error
+    ) {
+
+
+        console.error(
+
+            "Current Conditions Error:",
+
+            error
+
+        );
+
+
+        document.getElementById(
+            "stationName"
+        ).textContent =
+
+            "New Bedford Harbor · Observation unavailable";
+
+
+        document.getElementById(
+            "currentTemp"
+        ).textContent =
+            "--";
+
+
+        document.getElementById(
+            "currentPressure"
+        ).textContent =
+            "--";
+
+
+        document.getElementById(
+            "currentWind"
+        ).textContent =
+            "--";
+
+
+        document.getElementById(
+            "windDirection"
+        ).textContent =
+            "--";
+
+
+        document.getElementById(
+            "currentGust"
+        ).textContent =
+            "--";
+
+
+        document.getElementById(
+            "currentConditions"
+        ).textContent =
+
+            "Current observation unavailable";
+
+
+        document.getElementById(
+            "observationTime"
+        ).textContent =
+            "--";
+
+    }
+
+}
+
+
+
+/* =========================================================
+   BUILD 3-DAY FORECAST
+========================================================= */
+
+
+function buildThreeDayForecast(
+    periods
+) {
+
+
+    /*
+       NWS forecast periods alternate
+       between daytime and nighttime.
+
+       We group them by calendar date
+       so each card can show:
+
+       HIGH
+       LOW
+       CONDITIONS
+       PRECIP
+       WIND
+    */
+
+
+    const days =
+        {};
+
+
+    periods.forEach(
+        period => {
+
+
+            const date =
+
+                new Date(
+                    period.startTime
+                );
+
+
+            const dateKey =
+
+                date.toLocaleDateString(
+
+                    "en-CA",
+
+                    {
+
+                        timeZone:
+                            TIMEZONE
+
+                    }
+
+                );
+
+
+            if (!days[dateKey]) {
+
+
+                days[dateKey] = {
+
+                    date:
+                        date,
+
+                    daytime:
+                        null,
+
+                    nighttime:
+                        null
+
+                };
+
+            }
+
+
+            if (
+                period.isDaytime
+            ) {
+
+
+                days[dateKey].daytime =
+                    period;
+
+
+            }
+
+            else {
+
+
+                days[dateKey].nighttime =
+                    period;
+
+            }
+
+        }
+    );
+
+
+
+    /*
+       Keep first 3 calendar days
+       that contain useful forecast data.
+    */
+
+
+    return Object
+        .values(
+            days
+        )
+        .slice(
+            0,
+            3
+        );
+
+}
+
+
+
+/* =========================================================
+   CREATE FORECAST CARD
+========================================================= */
+
+
+function createForecastCard(
+    day
+) {
+
+
+    const daytime =
+        day.daytime;
+
+
+    const nighttime =
+        day.nighttime;
+
+
+
+    /* =====================================================
+       DAY NAME
+    ====================================================== */
+
+
+    const dayName =
+
+        day.date.toLocaleDateString(
+
+            "en-US",
+
+            {
+
+                timeZone:
+                    TIMEZONE,
+
+                weekday:
+                    "long"
+
+            }
+
+        );
+
+
+
+    const dateText =
+
+        day.date.toLocaleDateString(
+
+            "en-US",
+
+            {
+
+                timeZone:
+                    TIMEZONE,
+
+                month:
+                    "short",
+
+                day:
+                    "numeric"
+
+            }
+
+        );
+
+
+
+    /* =====================================================
+       HIGH / LOW
+    ====================================================== */
+
+
+    const high =
+
+        daytime
+
+            ? `${daytime.temperature}°`
+
+            : "--";
+
+
+    const low =
+
+        nighttime
+
+            ? `${nighttime.temperature}°`
+
+            : "--";
+
+
+
+    /* =====================================================
+       FORECAST DESCRIPTION
+    ====================================================== */
+
+
+    const primary =
+
+        daytime ||
+
+        nighttime;
+
+
+    const description =
+
+        primary
+            ?.shortForecast ||
+
+        "Forecast unavailable";
+
+
+
+    /* =====================================================
+       PRECIPITATION
+    ====================================================== */
+
+
+    const precip =
+
+        primary
+            ?.probabilityOfPrecipitation
+            ?.value;
+
+
+    const precipText =
+
+        precip !== null &&
+        precip !== undefined
+
+            ? `${precip}%`
+
+            : "--";
+
+
+
+    /* =====================================================
+       WIND
+    ====================================================== */
+
+
+    let windText =
+        "--";
+
+
+    if (primary) {
+
+
+        windText =
+
+            `${primary.windDirection} ${primary.windSpeed}`;
+
+    }
+
+
+
+    /* =====================================================
+       CARD HTML
+    ====================================================== */
+
+
+    return `
+
+        <div class="day-card">
+
+
+            <div class="day-name">
+
+                ${dayName}
+
+            </div>
+
+
+            <div class="day-date">
+
+                ${dateText}
+
+            </div>
+
+
+            <div class="temp-row">
+
+
+                <div class="high-temp">
+
+                    ${high}
+
+                </div>
+
+
+                <div class="low-temp">
+
+                    Low ${low}
+
+                </div>
+
+
+            </div>
+
+
+            <div class="short-forecast">
+
+                ${description}
+
+            </div>
+
+
+            <div class="day-details">
+
+
+                <div class="detail-row">
+
+                    <span class="detail-label">
+
+                        Precipitation
+
+                    </span>
+
+                    <span class="detail-value">
+
+                        ${precipText}
+
+                    </span>
+
+                </div>
+
+
+                <div class="detail-row">
+
+                    <span class="detail-label">
+
+                        Wind
+
+                    </span>
+
+                    <span class="detail-value">
+
+                        ${windText}
+
+                    </span>
+
+                </div>
+
+
+            </div>
+
+
+        </div>
+
+    `;
+
+}
+
+
+
+/* =========================================================
+   LOAD FORECAST
+========================================================= */
+
+
+async function loadForecast(
+    pointData
+) {
+
+
+    try {
+
+
+        /*
+           NWS /points tells us the correct
+           grid forecast URL for this location.
+        */
+
+
+        const forecastURL =
+
+            pointData
+                .properties
+                .forecast;
+
+
+        if (!forecastURL) {
+
+            throw new Error(
+                "Forecast URL unavailable"
+            );
+
+        }
+
+
+        const forecastData =
+
+            await fetchNWS(
+                forecastURL
+            );
+
+
+        const periods =
+
+            forecastData
+                .properties
+                .periods;
+
+
+        if (
+            !periods ||
+            !periods.length
+        ) {
+
+            throw new Error(
+                "No forecast periods returned"
+            );
+
+        }
+
+
+
+        const threeDays =
+
+            buildThreeDayForecast(
+                periods
+            );
+
+
+        const grid =
+
+            document.getElementById(
+                "forecastGrid"
+            );
+
+
+        grid.innerHTML =
+
+            threeDays
+
+                .map(
+                    createForecastCard
+                )
+
+                .join(
+                    ""
+                );
+
+
+    }
+
+
+    catch (
+        error
+    ) {
+
+
+        console.error(
+
+            "Forecast Error:",
+
+            error
+
+        );
+
+
+        document.getElementById(
+            "forecastGrid"
+        ).innerHTML = `
+
+            <div class="day-card">
+
+                <div class="day-name">
+                    Forecast Unavailable
+                </div>
+
+            </div>
+
+        `;
+
+    }
+
+}
+
+
+
+/* =========================================================
+   UPDATED TIME
+========================================================= */
+
+
+function setUpdatedTime() {
+
+
+    const time =
+
+        new Date()
+
+        .toLocaleTimeString(
+
+            "en-US",
+
+            {
+
+                timeZone:
+                    TIMEZONE,
+
+                hour:
+                    "numeric",
+
+                minute:
+                    "2-digit",
+
+                hour12:
+                    true
+
+            }
+
+        );
+
+
+    document.getElementById(
+        "updated"
+    ).textContent =
+
+        `Updated ${time}`;
+
+}
+
+
+
+/* =========================================================
+   LOAD EVERYTHING
+========================================================= */
+
+
+async function loadWeather() {
+
+
+    try {
+
+
+        /*
+           First retrieve the NWS point.
+
+           This provides both:
+           - Forecast URL
+           - Observation station URL
+        */
+
+
+        const pointData =
+
+            await getPointInformation();
+
+
+
+        /*
+           Current conditions and forecast
+           can then load simultaneously.
+        */
+
+
+        await Promise.all([
+
+            loadCurrentConditions(
+                pointData
+            ),
+
+            loadForecast(
+                pointData
+            )
+
+        ]);
+
+
+        setUpdatedTime();
+
+
+    }
+
+
+    catch (
+        error
+    ) {
+
+
+        console.error(
+
+            "Weather Widget Error:",
+
+            error
+
+        );
+
+
+        document.getElementById(
+            "currentConditions"
+        ).textContent =
+
+            "Weather information currently unavailable";
+
+
+        document.getElementById(
+            "forecastGrid"
+        ).innerHTML = `
+
+            <div class="day-card">
+
+                <div class="day-name">
+                    Forecast Unavailable
+                </div>
+
+            </div>
+
+        `;
+
+    }
+
+}
+
+
+
+/* =========================================================
+   INITIAL LOAD
+========================================================= */
+
+
+loadWeather();
+
+
+
+/* =========================================================
+   REFRESH EVERY 10 MINUTES
+========================================================= */
+
+
+setInterval(
+
+    loadWeather,
+
+    10 * 60 * 1000
+
+);
+
+
+</script>
+
+
+</body>
+
+</html>
