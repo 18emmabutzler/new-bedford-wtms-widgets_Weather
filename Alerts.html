@@ -10,10 +10,6 @@
 
 <style>
 
-/* =========================================================
-   BASE
-========================================================= */
-
 * {
     box-sizing: border-box;
 }
@@ -22,15 +18,8 @@ html,
 body {
     margin: 0;
     padding: 0;
-
     background: transparent;
-
-    font-family:
-        Arial,
-        Helvetica,
-        sans-serif;
-
-    color: #ffffff;
+    font-family: Arial, Helvetica, sans-serif;
 }
 
 
@@ -41,20 +30,17 @@ body {
 .alert-banner {
 
     width: 100%;
-
-    min-height: 105px;
+    height: 115px;
 
     background: #c62828;
+    color: #ffffff;
 
     border-radius: 7px;
 
-    padding:
-        12px 16px;
+    padding: 12px 16px;
 
     display: flex;
-
     flex-direction: column;
-
     justify-content: center;
 
     overflow: hidden;
@@ -68,46 +54,29 @@ body {
 .alert-top {
 
     display: flex;
-
     align-items: center;
-
-    flex-wrap: wrap;
-
     gap: 8px;
-
-    min-width: 0;
-}
-
-
-/* ALERT NAME */
-
-.alert-title {
-
-    font-size: 17px;
-
-    font-weight: 700;
 
     white-space: nowrap;
 }
 
 
-/* DIVIDERS */
+.alert-title {
+
+    font-size: 18px;
+    font-weight: 700;
+}
+
 
 .divider {
 
     opacity: 0.55;
-
-    font-size: 12px;
 }
 
-
-/* ISSUED / ENDS */
 
 .alert-time {
 
     font-size: 10px;
-
-    white-space: nowrap;
 }
 
 
@@ -117,14 +86,11 @@ body {
 }
 
 
-/* ZONE */
-
 .zone {
 
     margin-left: auto;
 
-    padding:
-        3px 6px;
+    padding: 3px 6px;
 
     border:
         1px solid rgba(255,255,255,0.6);
@@ -132,60 +98,48 @@ body {
     border-radius: 3px;
 
     font-size: 8px;
-
     font-weight: 700;
-
-    white-space: nowrap;
 }
 
 
 /* =========================================================
-   MAIN HAZARD INFORMATION
+   WHAT
 ========================================================= */
 
-.alert-main {
+.alert-what {
 
     margin-top: 8px;
 
     font-size: 12px;
-
     font-weight: 700;
 
-    line-height: 1.35;
+    line-height: 1.3;
 
     white-space: nowrap;
-
     overflow: hidden;
-
     text-overflow: ellipsis;
 }
 
 
 /* =========================================================
-   BOTTOM ROW
+   IMPACT
 ========================================================= */
 
-.alert-bottom {
+.alert-impact {
 
     margin-top: 6px;
-
-    display: flex;
-
-    align-items: center;
-
-    flex-wrap: wrap;
-
-    gap: 6px;
 
     font-size: 9px;
 
     line-height: 1.3;
 
-    opacity: 0.95;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 
-.alert-location {
+.alert-impact strong {
 
     font-weight: 700;
 }
@@ -197,16 +151,9 @@ body {
 
 .alert-banner.no-alert {
 
-    min-height: 70px;
+    height: 70px;
 
     background: #4b6478;
-}
-
-
-.alert-banner.no-alert
-.alert-main {
-
-    margin-top: 5px;
 }
 
 
@@ -216,30 +163,29 @@ body {
 
 .alert-banner.error {
 
+    height: 70px;
+
     background: #687684;
 }
 
 
 /* =========================================================
-   MOBILE / NARROW EXPERIENCE BUILDER WIDGET
+   RESPONSIVE
 ========================================================= */
 
-@media (max-width: 650px) {
+@media (max-width: 700px) {
 
     .alert-banner {
 
+        height: auto;
         min-height: 115px;
-
-        padding:
-            10px 12px;
     }
 
 
-    .alert-title {
+    .alert-top {
 
-        width: 100%;
-
-        font-size: 15px;
+        flex-wrap: wrap;
+        white-space: normal;
     }
 
 
@@ -249,17 +195,10 @@ body {
     }
 
 
-    .alert-main {
+    .alert-what,
+    .alert-impact {
 
         white-space: normal;
-
-        font-size: 11px;
-    }
-
-
-    .divider.hide-small {
-
-        display: none;
     }
 
 }
@@ -278,9 +217,7 @@ body {
 >
 
 
-    <!-- =====================================================
-         TOP ROW
-    ====================================================== -->
+    <!-- TOP ROW -->
 
     <div class="alert-top">
 
@@ -300,9 +237,7 @@ body {
 
         <div class="alert-time">
 
-            <strong>
-                Issued:
-            </strong>
+            <strong>Issued:</strong>
 
             <span id="alertIssued">
                 --
@@ -318,9 +253,7 @@ body {
 
         <div class="alert-time">
 
-            <strong>
-                Ends:
-            </strong>
+            <strong>Ends:</strong>
 
             <span id="alertEnds">
                 --
@@ -340,48 +273,31 @@ body {
 
 
 
-    <!-- =====================================================
-         IMPORTANT HAZARD INFORMATION
-    ====================================================== -->
+    <!-- WHAT -->
 
     <div
-        id="alertMain"
-        class="alert-main"
-        title=""
+        id="alertWhat"
+        class="alert-what"
     >
 
-        Loading National Weather Service marine hazard information...
+        Loading marine hazard information...
 
     </div>
 
 
 
-    <!-- =====================================================
-         LOCATION + IMPACT
-    ====================================================== -->
+    <!-- IMPACTS -->
 
-    <div class="alert-bottom">
+    <div
+        id="alertImpact"
+        class="alert-impact"
+    >
 
+        <strong>Impacts:</strong>
 
-        <span
-            id="alertLocation"
-            class="alert-location"
-        >
-            Buzzards Bay
+        <span id="impactText">
+            Loading...
         </span>
-
-
-        <span class="divider">
-            |
-        </span>
-
-
-        <span id="alertImpact">
-
-            Loading impact information...
-
-        </span>
-
 
     </div>
 
@@ -391,6 +307,7 @@ body {
 
 
 <script>
+
 
 /* =========================================================
    SETTINGS
@@ -417,21 +334,16 @@ function cleanText(text) {
     }
 
     return text
-
         .replace(/\r/g, "")
-
         .replace(/\t/g, " ")
-
         .replace(/\n+/g, " ")
-
         .replace(/\s+/g, " ")
-
         .trim();
 }
 
 
 /* =========================================================
-   FORMAT DATE
+   FORMAT DATE / TIME
 ========================================================= */
 
 function formatDateTime(dateString) {
@@ -440,45 +352,27 @@ function formatDateTime(dateString) {
         return "--";
     }
 
-    const date =
-        new Date(dateString);
+    return new Date(dateString)
+        .toLocaleString(
 
+            "en-US",
 
-    return date.toLocaleString(
+            {
+                timeZone: TIMEZONE,
+                weekday: "short",
+                month: "short",
+                day: "numeric",
+                hour: "numeric",
+                minute: "2-digit",
+                hour12: true
+            }
 
-        "en-US",
-
-        {
-
-            timeZone:
-                TIMEZONE,
-
-            weekday:
-                "short",
-
-            month:
-                "short",
-
-            day:
-                "numeric",
-
-            hour:
-                "numeric",
-
-            minute:
-                "2-digit",
-
-            hour12:
-                true
-
-        }
-
-    );
+        );
 }
 
 
 /* =========================================================
-   EXTRACT NWS ALERT SECTION
+   EXTRACT NWS SECTION
 ========================================================= */
 
 function extractSection(
@@ -533,23 +427,17 @@ function getAlertPriority(alert) {
         ).toLowerCase();
 
 
-    if (
-        event.includes("warning")
-    ) {
+    if (event.includes("warning")) {
         return 1;
     }
 
 
-    if (
-        event.includes("watch")
-    ) {
+    if (event.includes("watch")) {
         return 2;
     }
 
 
-    if (
-        event.includes("advisory")
-    ) {
+    if (event.includes("advisory")) {
         return 3;
     }
 
@@ -580,14 +468,10 @@ async function loadAlert() {
                 ALERT_URL,
 
                 {
-
                     headers: {
-
                         "Accept":
                             "application/geo+json"
-
                     }
-
                 }
 
             );
@@ -651,21 +535,15 @@ async function loadAlert() {
 
 
             document.getElementById(
-                "alertMain"
+                "alertWhat"
             ).textContent =
-                "No watches, warnings or advisories currently reported for Buzzards Bay.";
-
-
-            document.getElementById(
-                "alertLocation"
-            ).textContent =
-                "Buzzards Bay · ANZ234";
+                "No active watches, warnings or advisories for Buzzards Bay.";
 
 
             document.getElementById(
                 "alertImpact"
-            ).textContent =
-                "No marine hazards currently reported.";
+            ).style.display =
+                "none";
 
 
             return;
@@ -682,17 +560,24 @@ async function loadAlert() {
             "alert-banner";
 
 
+        document.getElementById(
+            "alertImpact"
+        ).style.display =
+            "block";
+
+
         const alert =
             alerts[0];
 
 
-        /* TITLE */
+        /* ALERT NAME */
 
         document.getElementById(
             "alertTitle"
         ).textContent =
             alert.event ||
             "Marine Weather Alert";
+
 
 
         /* =================================================
@@ -708,11 +593,15 @@ async function loadAlert() {
         document.getElementById(
             "alertIssued"
         ).textContent =
+
             issuedTime
+
                 ? formatDateTime(
                     issuedTime
                 )
+
                 : "Not reported";
+
 
 
         /* =================================================
@@ -727,11 +616,15 @@ async function loadAlert() {
         document.getElementById(
             "alertEnds"
         ).textContent =
+
             endTime
+
                 ? formatDateTime(
                     endTime
                 )
+
                 : "Until further notice";
+
 
 
         /* =================================================
@@ -743,9 +636,7 @@ async function loadAlert() {
             "";
 
 
-        /* =================================================
-           WHAT
-        ================================================= */
+        /* WHAT */
 
         const what =
             extractSection(
@@ -754,50 +645,26 @@ async function loadAlert() {
             );
 
 
-        const mainText =
+        const whatText =
             what ||
             alert.headline ||
-            "See National Weather Service alert.";
-
-
-        const main =
-            document.getElementById(
-                "alertMain"
-            );
-
-
-        main.textContent =
-            mainText;
-
-
-        /* Full text appears on hover */
-
-        main.title =
-            mainText;
-
-
-        /* =================================================
-           WHERE
-        ================================================= */
-
-        const where =
-            extractSection(
-                description,
-                "WHERE"
-            );
+            "See National Weather Service alert information.";
 
 
         document.getElementById(
-            "alertLocation"
+            "alertWhat"
         ).textContent =
-            where ||
-            alert.areaDesc ||
-            "Buzzards Bay";
+            whatText;
 
 
-        /* =================================================
-           IMPACT
-        ================================================= */
+        document.getElementById(
+            "alertWhat"
+        ).title =
+            whatText;
+
+
+
+        /* IMPACTS */
 
         const impacts =
             extractSection(
@@ -806,11 +673,21 @@ async function loadAlert() {
             );
 
 
+        const impactText =
+            impacts ||
+            "See National Weather Service alert for marine impacts.";
+
+
+        document.getElementById(
+            "impactText"
+        ).textContent =
+            impactText;
+
+
         document.getElementById(
             "alertImpact"
-        ).textContent =
-            impacts ||
-            "See NWS alert for marine impacts.";
+        ).title =
+            impactText;
 
 
     }
@@ -848,21 +725,15 @@ async function loadAlert() {
 
 
         document.getElementById(
-            "alertMain"
+            "alertWhat"
         ).textContent =
-            "Unable to retrieve current National Weather Service marine alerts.";
-
-
-        document.getElementById(
-            "alertLocation"
-        ).textContent =
-            "Buzzards Bay · ANZ234";
+            "Unable to retrieve current NWS marine alerts.";
 
 
         document.getElementById(
             "alertImpact"
-        ).textContent =
-            "Check the National Weather Service for current conditions.";
+        ).style.display =
+            "none";
 
     }
 
@@ -887,6 +758,7 @@ setInterval(
     5 * 60 * 1000
 
 );
+
 
 </script>
 
