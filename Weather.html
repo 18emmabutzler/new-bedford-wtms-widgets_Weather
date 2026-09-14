@@ -19,21 +19,21 @@ html, body {
 #alertBar {
     box-sizing: border-box;
     width: 100%;
-    height: 38px;
+    height: 32px;
 
     display: flex;
     align-items: center;
     justify-content: center;
 
-    padding: 0 12px;
+    padding: 0 14px;
 
     background: #ffffff;
     color: #000000;
 
     border: 1px solid #d9d9d9;
-    border-radius: 4px;
+    border-radius: 3px;
 
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 600;
 
     white-space: nowrap;
@@ -73,7 +73,7 @@ html, body {
 const zones = [
     {
         id: "MAZ020",
-        name: "Southern Bristol"
+        name: "New Bedford"
     },
     {
         id: "ANZ234",
@@ -81,6 +81,88 @@ const zones = [
     }
 ];
 
+
+/* -----------------------------------
+   FORMAT END TIME
+------------------------------------ */
+
+function formatEndTime(dateString) {
+
+    if (!dateString) {
+        return "";
+    }
+
+    const date = new Date(dateString);
+
+    return date.toLocaleString("en-US", {
+        timeZone: "America/New_York",
+        weekday: "short",
+        hour: "numeric",
+        minute: "2-digit",
+        hour12: true
+    });
+
+}
+
+
+/* -----------------------------------
+   CREATE SHORT HAZARD DESCRIPTION
+------------------------------------ */
+
+function getShortDescription(description) {
+
+    if (!description) {
+        return "";
+    }
+
+    let text = description
+        .replace(/\n+/g, " ")
+        .replace(/\s+/g, " ")
+        .trim();
+
+
+    /* Look for the NWS WHAT section */
+
+    const whatMatch =
+        text.match(/\* WHAT\.\.\.(.*?)(?=\* WHERE|\* WHEN|\* IMPACTS|$)/i);
+
+    if (whatMatch && whatMatch[1]) {
+
+        return whatMatch[1]
+            .trim()
+            .replace(/\.$/, "");
+
+    }
+
+
+    /* If WHAT is not available, use first sentence */
+
+    const firstSentence =
+        text.match(/^(.+?[.!?])(?:\s|$)/);
+
+    if (firstSentence) {
+
+        return firstSentence[1]
+            .trim()
+            .replace(/\.$/, "");
+
+    }
+
+
+    /* Last fallback */
+
+    if (text.length > 150) {
+        return text.substring(0, 147) + "...";
+    }
+
+    return text;
+
+}
+
+
+/* -----------------------------------
+   LOAD ALERTS
+------------------------------------ */
 
 async function loadAlerts() {
 
@@ -92,7 +174,7 @@ async function loadAlerts() {
         let alerts = [];
 
 
-        /* Check both NWS zones */
+        /* CHECK BOTH NWS ZONES */
 
         for (const zone of zones) {
 
@@ -111,9 +193,11 @@ async function loadAlerts() {
 
 
             if (!response.ok) {
+
                 throw new Error(
                     `NWS API error ${response.status}`
                 );
+
             }
 
 
@@ -125,19 +209,36 @@ async function loadAlerts() {
 
                 data.features.forEach(feature => {
 
+                    const p =
+                        feature.properties || {};
+
+
                     alerts.push({
 
                         id:
-                            feature.properties.id ||
+                            p.id ||
                             feature.id ||
                             "",
 
                         event:
-                            feature.properties.event ||
+                            p.event ||
                             "Weather Alert",
 
                         location:
-                            zone.name
+                            zone.name,
+
+                        ends:
+                            p.ends ||
+                            p.expires ||
+                            "",
+
+                        description:
+                            p.description ||
+                            "",
+
+                        severity:
+                            p.severity ||
+                            ""
 
                     });
 
@@ -148,9 +249,9 @@ async function loadAlerts() {
         }
 
 
-        /* -------------------------------
+        /* -----------------------------------
            REMOVE DUPLICATES
-        -------------------------------- */
+        ------------------------------------ */
 
         const unique = [];
 
@@ -161,7 +262,8 @@ async function loadAlerts() {
 
             const key =
                 alert.id ||
-                alert.event;
+                alert.event + alert.location;
+
 
             if (!seen.has(key)) {
 
@@ -174,44 +276,81 @@ async function loadAlerts() {
         });
 
 
-        /* -------------------------------
-           NO ALERTS
-        -------------------------------- */
+        /* -----------------------------------
+           NO ACTIVE ALERTS
+        ------------------------------------ */
 
         if (unique.length === 0) {
 
             bar.classList.remove("active");
 
             bar.textContent =
-                "✓ No Active Weather or Marine Alerts";
+                "No Active Weather or Marine Alerts";
 
             return;
 
         }
 
 
-        /* -------------------------------
+        /* -----------------------------------
            ACTIVE ALERT
-        -------------------------------- */
+        ------------------------------------ */
 
         bar.classList.add("active");
 
 
-        if (unique.length === 1) {
+        const alert =
+            unique[0];
 
-            bar.textContent =
-                `⚠ ${unique[0].event.toUpperCase()} — ${unique[0].location}`;
+
+        const endTime =
+            formatEndTime(alert.ends);
+
+
+        const details =
+            getShortDescription(alert.description);
+
+
+        let parts = [];
+
+
+        /* ALERT TYPE + LOCATION */
+
+        parts.push(
+            `${alert.event.toUpperCase()} — ${alert.location}`
+        );
+
+
+        /* END TIME */
+
+        if (endTime) {
+
+            parts.push(
+                `Until ${endTime}`
+            );
 
         }
 
-        else {
 
-            bar.textContent =
-                `⚠ ${unique.length} ACTIVE ALERTS — ${unique
-                    .map(a => a.event)
-                    .join(" • ")}`;
+        /* QUICK DETAILS */
+
+        if (details) {
+
+            parts.push(details);
 
         }
+
+
+        /* BUILD ONE LINE */
+
+        bar.textContent =
+            parts.join("  |  ");
+
+
+        /* Show full text on hover */
+
+        bar.title =
+            bar.textContent;
 
     }
 
@@ -223,6 +362,7 @@ async function loadAlerts() {
             error
         );
 
+
         bar.classList.remove("active");
 
         bar.textContent =
@@ -233,12 +373,12 @@ async function loadAlerts() {
 }
 
 
-/* Check immediately */
+/* CHECK IMMEDIATELY */
 
 loadAlerts();
 
 
-/* Refresh every 5 minutes */
+/* REFRESH EVERY 5 MINUTES */
 
 setInterval(
     loadAlerts,
