@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+
+html, body {
+    margin: 0;
+    padding: 0;
+    background: transparent;
+    font-family: "Avenir Next", Avenir, Arial, sans-serif;
+}
+
+/* ONE-LINE ALERT BAR */
+
+#alertBar {
+    box-sizing: border-box;
+    width: 100%;
+    height: 38px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 0 12px;
+
+    background: #ffffff;
+    color: #000000;
+
+    border: 1px solid #d9d9d9;
+    border-radius: 4px;
+
+    font-size: 13px;
+    font-weight: 600;
+
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+
+/* ACTIVE ALERT */
+
+#alertBar.active {
+    background: #c62828;
+    color: #ffffff;
+    border-color: #c62828;
+}
+
+</style>
+</head>
+
+
+<body>
+
+<div id="alertBar">
+    Checking current alerts...
+</div>
+
+
+<script>
+
+/* -----------------------------------
+   PORT OF NEW BEDFORD
+
+   MAZ020 = Southern Bristol
+   ANZ234 = Buzzards Bay
+------------------------------------ */
+
+const zones = [
+    {
+        id: "MAZ020",
+        name: "Southern Bristol"
+    },
+    {
+        id: "ANZ234",
+        name: "Buzzards Bay"
+    }
+];
+
+
+async function loadAlerts() {
+
+    const bar =
+        document.getElementById("alertBar");
+
+    try {
+
+        let alerts = [];
+
+
+        /* Check both NWS zones */
+
+        for (const zone of zones) {
+
+            const url =
+                `https://api.weather.gov/alerts/active/zone/${zone.id}`;
+
+
+            const response =
+                await fetch(url, {
+
+                    headers: {
+                        "Accept": "application/geo+json"
+                    }
+
+                });
+
+
+            if (!response.ok) {
+                throw new Error(
+                    `NWS API error ${response.status}`
+                );
+            }
+
+
+            const data =
+                await response.json();
+
+
+            if (data.features) {
+
+                data.features.forEach(feature => {
+
+                    alerts.push({
+
+                        id:
+                            feature.properties.id ||
+                            feature.id ||
+                            "",
+
+                        event:
+                            feature.properties.event ||
+                            "Weather Alert",
+
+                        location:
+                            zone.name
+
+                    });
+
+                });
+
+            }
+
+        }
+
+
+        /* -------------------------------
+           REMOVE DUPLICATES
+        -------------------------------- */
+
+        const unique = [];
+
+        const seen = new Set();
+
+
+        alerts.forEach(alert => {
+
+            const key =
+                alert.id ||
+                alert.event;
+
+            if (!seen.has(key)) {
+
+                seen.add(key);
+
+                unique.push(alert);
+
+            }
+
+        });
+
+
+        /* -------------------------------
+           NO ALERTS
+        -------------------------------- */
+
+        if (unique.length === 0) {
+
+            bar.classList.remove("active");
+
+            bar.textContent =
+                "✓ No Active Weather or Marine Alerts";
+
+            return;
+
+        }
+
+
+        /* -------------------------------
+           ACTIVE ALERT
+        -------------------------------- */
+
+        bar.classList.add("active");
+
+
+        if (unique.length === 1) {
+
+            bar.textContent =
+                `⚠ ${unique[0].event.toUpperCase()} — ${unique[0].location}`;
+
+        }
+
+        else {
+
+            bar.textContent =
+                `⚠ ${unique.length} ACTIVE ALERTS — ${unique
+                    .map(a => a.event)
+                    .join(" • ")}`;
+
+        }
+
+    }
+
+
+    catch (error) {
+
+        console.error(
+            "NWS Alert Error:",
+            error
+        );
+
+        bar.classList.remove("active");
+
+        bar.textContent =
+            "Weather Alert Data Unavailable";
+
+    }
+
+}
+
+
+/* Check immediately */
+
+loadAlerts();
+
+
+/* Refresh every 5 minutes */
+
+setInterval(
+    loadAlerts,
+    5 * 60 * 1000
+);
+
+</script>
+
+</body>
+
+</html>
