@@ -28,6 +28,8 @@ body {
     margin: 0;
     padding: 0;
 
+    height: 100%;
+
     background: transparent;
 
     font-family:
@@ -40,6 +42,7 @@ body {
 
 .wrapper {
     width: 100%;
+    height: 100%;
 }
 
 
@@ -51,6 +54,12 @@ body {
 
     width: 100%;
 
+    height: 100vh;
+
+    display: flex;
+
+    flex-direction: column;
+
     background: #ffffff;
 
     border:
@@ -58,7 +67,7 @@ body {
 
     border-radius: 9px;
 
-    overflow: hidden;
+    overflow: auto;
 }
 
 
@@ -283,6 +292,8 @@ body {
 
     padding:
         0 16px 14px 16px;
+
+    flex: 1;
 }
 
 
