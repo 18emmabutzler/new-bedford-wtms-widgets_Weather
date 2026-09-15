@@ -8,6 +8,7 @@
   html, body {
     margin: 0;
     padding: 0;
+    height: 100%;
     background: transparent;
     font-family: Arial, Helvetica, sans-serif;
     color: #111;
@@ -16,6 +17,9 @@
   .tide-card {
     box-sizing: border-box;
     width: 100%;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
     background: #ffffff;
     border: 1px solid #d9d9d9;
     border-radius: 9px;
@@ -111,6 +115,9 @@
   /* CHART */
 
   .chart-section {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
     border-top: 1px solid #ddd;
     padding-top: 9px;
   }
@@ -123,8 +130,29 @@
 
   #chart {
     width: 100%;
-    height: 145px;
+    height: auto;
+    min-height: 145px;
+    flex: 1 1 145px;
     display: block;
+  }
+
+  /* NOAA LINK */
+
+  .tides-link {
+    display: block;
+    margin: 8px 0 10px 0;
+    padding: 9px 10px;
+    background: #074b78;
+    border-radius: 6px;
+    color: #ffffff;
+    text-align: center;
+    text-decoration: none;
+    font-size: 10px;
+    font-weight: 700;
+  }
+
+  .tides-link:hover {
+    background: #063a5d;
   }
 
   /* FOOTER */
@@ -242,6 +270,18 @@
     <svg id="chart"></svg>
 
   </div>
+
+
+  <!-- NOAA STATION LINK -->
+
+  <a
+    class="tides-link"
+    href="https://tidesandcurrents.noaa.gov/stationhome.html?id=8447636"
+    target="_blank"
+    rel="noopener noreferrer"
+  >
+    Full Tides Information
+  </a>
 
 
   <!-- FOOTER -->
