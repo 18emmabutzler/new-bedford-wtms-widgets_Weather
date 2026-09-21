@@ -2,11 +2,10 @@
 <html lang="en">
 
 <head>
-
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Buzzards Bay Marine Alert</title>
+<title>Port of New Bedford Weather Alerts</title>
 
 <style>
 
@@ -19,7 +18,7 @@ body {
     margin: 0;
     padding: 0;
     background: transparent;
-    font-family: Arial, Helvetica, sans-serif;
+    font-family: "Avenir Next", Avenir, Arial, sans-serif;
 }
 
 
@@ -92,8 +91,7 @@ body {
 
     padding: 3px 6px;
 
-    border:
-        1px solid rgba(255,255,255,0.6);
+    border: 1px solid rgba(255,255,255,0.6);
 
     border-radius: 3px;
 
@@ -122,7 +120,7 @@ body {
 
 
 /* =========================================================
-   IMPACT
+   IMPACTS
 ========================================================= */
 
 .alert-impact {
@@ -153,7 +151,16 @@ body {
 
     height: 70px;
 
-    background: #4b6478;
+    background: #ffffff;
+    color: #000000;
+
+    border: 1px solid #d9d9d9;
+}
+
+
+.alert-banner.no-alert .zone {
+
+    border-color: #999999;
 }
 
 
@@ -166,6 +173,7 @@ body {
     height: 70px;
 
     background: #687684;
+    color: #ffffff;
 }
 
 
@@ -179,6 +187,7 @@ body {
 
         height: auto;
         min-height: 115px;
+
     }
 
 
@@ -186,12 +195,14 @@ body {
 
         flex-wrap: wrap;
         white-space: normal;
+
     }
 
 
     .zone {
 
         margin-left: 0;
+
     }
 
 
@@ -199,12 +210,12 @@ body {
     .alert-impact {
 
         white-space: normal;
+
     }
 
 }
 
 </style>
-
 </head>
 
 
@@ -226,7 +237,7 @@ body {
             id="alertTitle"
             class="alert-title"
         >
-            Checking Marine Alerts...
+            Checking Weather Alerts...
         </div>
 
 
@@ -262,10 +273,11 @@ body {
         </div>
 
 
-        <div class="zone">
-
-            BUZZARDS BAY · ANZ234
-
+        <div
+            id="alertZone"
+            class="zone"
+        >
+            PORT OF NEW BEDFORD
         </div>
 
 
@@ -280,7 +292,7 @@ body {
         class="alert-what"
     >
 
-        Loading marine hazard information...
+        Loading hazard information...
 
     </div>
 
@@ -311,16 +323,34 @@ body {
 
 /* =========================================================
    SETTINGS
+
+   MAZ020 = Southern Bristol / New Bedford
+   ANZ234 = Buzzards Bay
+
+   IMPORTANT:
+   If MAZ020 has ANY active alert, it will be displayed
+   before an ANZ234 alert.
 ========================================================= */
 
-const ZONE =
-    "ANZ234";
+
+const ZONES = [
+
+    {
+        id: "MAZ020",
+        name: "NEW BEDFORD"
+    },
+
+    {
+        id: "ANZ234",
+        name: "BUZZARDS BAY"
+    }
+
+];
+
 
 const TIMEZONE =
     "America/New_York";
 
-const ALERT_URL =
-    `https://api.weather.gov/alerts/active/zone/${ZONE}`;
 
 
 /* =========================================================
@@ -330,16 +360,26 @@ const ALERT_URL =
 function cleanText(text) {
 
     if (!text) {
+
         return "";
+
     }
 
+
     return text
+
         .replace(/\r/g, "")
+
         .replace(/\t/g, " ")
+
         .replace(/\n+/g, " ")
+
         .replace(/\s+/g, " ")
+
         .trim();
+
 }
+
 
 
 /* =========================================================
@@ -349,30 +389,51 @@ function cleanText(text) {
 function formatDateTime(dateString) {
 
     if (!dateString) {
+
         return "--";
+
     }
 
+
     return new Date(dateString)
+
         .toLocaleString(
 
             "en-US",
 
             {
+
                 timeZone: TIMEZONE,
+
                 weekday: "short",
+
                 month: "short",
+
                 day: "numeric",
+
                 hour: "numeric",
+
                 minute: "2-digit",
+
                 hour12: true
+
             }
 
         );
+
 }
+
 
 
 /* =========================================================
    EXTRACT NWS SECTION
+
+   Pulls sections such as:
+
+   * WHAT...
+   * WHERE...
+   * WHEN...
+   * IMPACTS...
 ========================================================= */
 
 function extractSection(
@@ -381,15 +442,19 @@ function extractSection(
 ) {
 
     if (!text) {
+
         return "";
+
     }
 
 
     const sections =
+
         "WHAT|WHERE|WHEN|IMPACTS|ADDITIONAL DETAILS";
 
 
     const regex =
+
         new RegExp(
 
             `\\*\\s*${section}\\.\\.\\.([\\s\\S]*?)(?=\\*\\s*(?:${sections})\\.\\.\\.|PRECAUTIONARY\\/PREPAREDNESS ACTIONS|&&|\\$\\$|$)`,
@@ -404,56 +469,114 @@ function extractSection(
 
 
     if (!match) {
+
         return "";
+
     }
 
 
     return cleanText(
         match[1]
     );
+
 }
 
 
+
 /* =========================================================
-   ALERT PRIORITY
+   ALERT TYPE PRIORITY
+
+   This is used AFTER zone priority.
+
+   1 = Warning
+   2 = Watch
+   3 = Advisory
+   4 = Other
 ========================================================= */
 
 function getAlertPriority(alert) {
 
+
     const event =
+
         (
             alert.event ||
             ""
         ).toLowerCase();
 
 
+
     if (event.includes("warning")) {
+
         return 1;
+
     }
+
 
 
     if (event.includes("watch")) {
+
         return 2;
+
     }
+
 
 
     if (event.includes("advisory")) {
+
         return 3;
+
     }
 
 
+
     return 4;
+
 }
 
 
+
 /* =========================================================
-   LOAD ALERT
+   ZONE PRIORITY
+
+   NEW BEDFORD ALWAYS WINS
+
+   MAZ020 = priority 1
+   ANZ234 = priority 2
 ========================================================= */
 
-async function loadAlert() {
+function getZonePriority(alert) {
+
+
+    if (alert.zoneId === "MAZ020") {
+
+        return 1;
+
+    }
+
+
+    if (alert.zoneId === "ANZ234") {
+
+        return 2;
+
+    }
+
+
+    return 3;
+
+}
+
+
+
+/* =========================================================
+   LOAD ALERTS
+========================================================= */
+
+async function loadAlerts() {
 
 
     const banner =
+
         document.getElementById(
             "alertBanner"
         );
@@ -462,87 +585,310 @@ async function loadAlert() {
     try {
 
 
-        const response =
-            await fetch(
+        let alerts = [];
 
-                ALERT_URL,
 
-                {
-                    headers: {
-                        "Accept":
-                            "application/geo+json"
+
+        /* =================================================
+           CHECK BOTH NWS ZONES
+        ================================================= */
+
+        for (const zone of ZONES) {
+
+
+            const url =
+
+                `https://api.weather.gov/alerts/active/zone/${zone.id}`;
+
+
+
+            const response =
+
+                await fetch(
+
+                    url,
+
+                    {
+
+                        headers: {
+
+                            "Accept":
+                                "application/geo+json"
+
+                        }
+
                     }
-                }
 
-            );
+                );
 
 
-        if (!response.ok) {
 
-            throw new Error(
-                "NWS alert request failed"
-            );
+            if (!response.ok) {
+
+
+                throw new Error(
+
+                    `NWS API request failed for ${zone.id}`
+
+                );
+
+            }
+
+
+
+            const data =
+
+                await response.json();
+
+
+
+            /* =================================================
+               ADD ALERTS FROM THIS ZONE
+            ================================================= */
+
+            if (data.features) {
+
+
+                data.features.forEach(
+
+                    feature => {
+
+
+                        const p =
+
+                            feature.properties ||
+                            {};
+
+
+
+                        alerts.push({
+
+
+                            id:
+
+                                p.id ||
+                                feature.id ||
+                                "",
+
+
+                            event:
+
+                                p.event ||
+                                "Weather Alert",
+
+
+                            sent:
+
+                                p.sent ||
+                                p.effective ||
+                                p.onset ||
+                                "",
+
+
+                            ends:
+
+                                p.ends ||
+                                p.expires ||
+                                "",
+
+
+                            description:
+
+                                p.description ||
+                                "",
+
+
+                            headline:
+
+                                p.headline ||
+                                "",
+
+
+                            severity:
+
+                                p.severity ||
+                                "",
+
+
+                            zoneId:
+
+                                zone.id,
+
+
+                            zoneName:
+
+                                zone.name
+
+
+                        });
+
+
+                    }
+
+                );
+
+            }
 
         }
 
 
-        const data =
-            await response.json();
+
+        /* =================================================
+           REMOVE DUPLICATE ALERTS
+        ================================================= */
+
+        const unique = [];
+
+        const seen =
+            new Set();
 
 
-        const alerts =
-            (data.features || [])
 
-                .map(
-                    feature =>
-                        feature.properties
-                )
+        alerts.forEach(
 
-                .sort(
-                    (a, b) =>
-                        getAlertPriority(a) -
-                        getAlertPriority(b)
-                );
+            alert => {
+
+
+                const key =
+
+                    alert.id ||
+
+                    `${alert.event}-${alert.zoneId}`;
+
+
+
+                if (!seen.has(key)) {
+
+
+                    seen.add(key);
+
+
+                    unique.push(
+                        alert
+                    );
+
+                }
+
+            }
+
+        );
+
 
 
         /* =================================================
-           NO ACTIVE ALERT
+           SORT ALERTS
+
+           FIRST:
+           New Bedford beats Buzzards Bay
+
+           THEN:
+           Warning
+           Watch
+           Advisory
+           Other
+
+           Example:
+
+           New Bedford Advisory
+           beats
+           Buzzards Bay Warning
         ================================================= */
 
-        if (!alerts.length) {
+        unique.sort(
+
+            (a, b) => {
+
+
+                const zoneDifference =
+
+                    getZonePriority(a) -
+                    getZonePriority(b);
+
+
+
+                /* Zone always comes first */
+
+                if (zoneDifference !== 0) {
+
+                    return zoneDifference;
+
+                }
+
+
+
+                /* Same zone:
+                   sort by alert severity/type */
+
+                return (
+
+                    getAlertPriority(a) -
+                    getAlertPriority(b)
+
+                );
+
+            }
+
+        );
+
+
+
+        /* =================================================
+           NO ACTIVE ALERTS
+        ================================================= */
+
+        if (unique.length === 0) {
 
 
             banner.className =
+
                 "alert-banner no-alert";
+
 
 
             document.getElementById(
                 "alertTitle"
             ).textContent =
-                "No Active Marine Alerts";
+
+                "No Active Weather or Marine Alerts";
+
 
 
             document.getElementById(
                 "alertIssued"
             ).textContent =
+
                 "--";
+
 
 
             document.getElementById(
                 "alertEnds"
             ).textContent =
+
                 "--";
+
+
+
+            document.getElementById(
+                "alertZone"
+            ).textContent =
+
+                "PORT OF NEW BEDFORD";
+
 
 
             document.getElementById(
                 "alertWhat"
             ).textContent =
-                "No active watches, warnings or advisories for Buzzards Bay.";
+
+                "No active watches, warnings or advisories for New Bedford or Buzzards Bay.";
+
 
 
             document.getElementById(
                 "alertImpact"
             ).style.display =
+
                 "none";
 
 
@@ -557,26 +903,58 @@ async function loadAlert() {
         ================================================= */
 
         banner.className =
+
             "alert-banner";
+
 
 
         document.getElementById(
             "alertImpact"
         ).style.display =
+
             "block";
 
 
+
+        /*
+           Because the array has already been sorted,
+           alerts[0] is now:
+
+           1. New Bedford alert, if one exists
+
+           OR
+
+           2. Buzzards Bay alert if New Bedford has none
+        */
+
         const alert =
-            alerts[0];
+
+            unique[0];
 
 
-        /* ALERT NAME */
+
+        /* =================================================
+           ALERT NAME
+        ================================================= */
 
         document.getElementById(
             "alertTitle"
         ).textContent =
+
             alert.event ||
-            "Marine Weather Alert";
+            "Weather Alert";
+
+
+
+        /* =================================================
+           ZONE
+        ================================================= */
+
+        document.getElementById(
+            "alertZone"
+        ).textContent =
+
+            `${alert.zoneName} · ${alert.zoneId}`;
 
 
 
@@ -584,20 +962,15 @@ async function loadAlert() {
            ISSUED
         ================================================= */
 
-        const issuedTime =
-            alert.sent ||
-            alert.effective ||
-            alert.onset;
-
-
         document.getElementById(
             "alertIssued"
         ).textContent =
 
-            issuedTime
+
+            alert.sent
 
                 ? formatDateTime(
-                    issuedTime
+                    alert.sent
                 )
 
                 : "Not reported";
@@ -608,19 +981,15 @@ async function loadAlert() {
            ENDS
         ================================================= */
 
-        const endTime =
-            alert.ends ||
-            alert.expires;
-
-
         document.getElementById(
             "alertEnds"
         ).textContent =
 
-            endTime
+
+            alert.ends
 
                 ? formatDateTime(
-                    endTime
+                    alert.ends
                 )
 
                 : "Until further notice";
@@ -628,111 +997,157 @@ async function loadAlert() {
 
 
         /* =================================================
-           DESCRIPTION
+           WHAT
         ================================================= */
 
-        const description =
-            alert.description ||
-            "";
-
-
-        /* WHAT */
-
         const what =
+
             extractSection(
-                description,
+
+                alert.description,
+
                 "WHAT"
+
             );
 
 
+
         const whatText =
+
             what ||
+
             alert.headline ||
+
             "See National Weather Service alert information.";
+
 
 
         document.getElementById(
             "alertWhat"
         ).textContent =
+
             whatText;
+
 
 
         document.getElementById(
             "alertWhat"
         ).title =
+
             whatText;
 
 
 
-        /* IMPACTS */
+        /* =================================================
+           IMPACTS
+        ================================================= */
 
         const impacts =
+
             extractSection(
-                description,
+
+                alert.description,
+
                 "IMPACTS"
+
             );
 
 
+
         const impactText =
+
             impacts ||
-            "See National Weather Service alert for marine impacts.";
+
+            "See National Weather Service alert for additional impacts.";
+
 
 
         document.getElementById(
             "impactText"
         ).textContent =
+
             impactText;
+
 
 
         document.getElementById(
             "alertImpact"
         ).title =
+
             impactText;
 
 
     }
 
 
+
+    /* =====================================================
+       ERROR
+    ===================================================== */
+
     catch (error) {
 
 
         console.error(
-            "Marine Alert Error:",
+
+            "NWS Alert Error:",
+
             error
+
         );
 
 
+
         banner.className =
+
             "alert-banner error";
+
 
 
         document.getElementById(
             "alertTitle"
         ).textContent =
-            "Marine Alert Data Unavailable";
+
+            "Weather Alert Data Unavailable";
+
 
 
         document.getElementById(
             "alertIssued"
         ).textContent =
+
             "--";
+
 
 
         document.getElementById(
             "alertEnds"
         ).textContent =
+
             "--";
+
+
+
+        document.getElementById(
+            "alertZone"
+        ).textContent =
+
+            "PORT OF NEW BEDFORD";
+
 
 
         document.getElementById(
             "alertWhat"
         ).textContent =
-            "Unable to retrieve current NWS marine alerts.";
+
+            "Unable to retrieve current NWS weather and marine alerts.";
+
 
 
         document.getElementById(
             "alertImpact"
         ).style.display =
+
             "none";
 
     }
@@ -740,11 +1155,13 @@ async function loadAlert() {
 }
 
 
+
 /* =========================================================
    INITIAL LOAD
 ========================================================= */
 
-loadAlert();
+loadAlerts();
+
 
 
 /* =========================================================
@@ -753,7 +1170,7 @@ loadAlert();
 
 setInterval(
 
-    loadAlert,
+    loadAlerts,
 
     5 * 60 * 1000
 
@@ -761,7 +1178,6 @@ setInterval(
 
 
 </script>
-
 
 </body>
 
